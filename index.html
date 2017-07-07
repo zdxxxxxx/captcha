@@ -3,137 +3,104 @@
 
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=0">
     <meta http-equiv="X-UA-Compatible" content="ie=edge">
-    <title>Captcha Demo</title>
-    <link rel="stylesheet" href="./build/sdk/style.css">
+    <title>SMCaptcha</title>
 </head>
+<style>
+    * {
+        margin: 0;
+        padding: 0;
+    }
+    html,body{
+        width: 100%;
+        height: 100%;
+        overflow-y:scroll;
+    }
+    .captcha-container{
+        width: 100%;
+        height: 100%;
+        margin: 0 auto;
+    }
+</style>
 
 <body>
-    <div class='demo-warpper'>
-        <div class='captcha-warpper'>
-            <div class='bg-warpper'>
-                <img src="./build/img/WechatIMG1.jpeg" alt="">
-            </div>
-            <div class="bg-piece" id='piece'>
-                <img src="./build/img/WechatIMG2.png" alt="">
-            </div>
-        </div>
-        <div class='slider-block'>
-            <div class='slider' id='slider'></div>
-        </div>
-        <div>
-            <button class='refresh' id='refresh'>refresh</button>
-        </div>
+    <div id="captcha" class="captcha-container">
+
     </div>
+
 </body>
-<script src="build/smcp/smcp.js"></script>
+<script src="dist/smcp/smcp.min.js"></script>
+
+
 <script>
-    var getNativeParams;
-    var nativeParams = {}
-    if (getNativeParams) {
-        nativeParams = getNativeParams();
-        console.log(nativeParams)
-    } else {
-        console.log('function getNativeParams is not defined')
-    }
-    initSMCaptcha({
-        org: nativeParams.org || 'zdxxxxxx', //公司标识
-        appId: nativeParams.appId || 'app_123', //渠道
-        width: nativeParams.width || 320, //宽度
-        retry: nativeParams.retry || 5, //刷新最大次数
-        timeout: nativeParams.timeout || 30000, //超时时间
-        protocol: 'http://',
-        data: nativeParams.data || {} //预留字段
-    }, function (SMCaptcha) {
-        SMCaptcha.reset()
-    })
+//    initSMCaptcha({
+//        organization: 'IkzxwQ4vofwwvFqC8ir2', //公司标识
+//        appId: 'xxxxxxxxx', //渠道
+//        version:'v2.3.5',//js-sdk版本 默认为最新版本
+//        timeout: 5000, //超时时间
+//        https:false,//是否https协议
+//        appendTo:'captcha',//验证码容器id
+//        maxRetry:3,
+//        data: {},//预留字段
+//        onError:function (err,detail) {
+//            err.method = 'onError';
+//            err.detail = detail;
+//            err = encodeURIComponent(JSON.stringify(err));
+//            document.location = 'shumei://onresult?data='+err;
+//        }
+//    }, function (SMCaptcha) {
+//        SMCaptcha.onSuccess(function(){
+//            var result = SMCaptcha.getResult();
+//            result.method="onSuccess";
+//            result = encodeURIComponent(JSON.stringify(result));
+//            document.location = 'shumei://onresult?data='+result;
+//        });
+//        SMCaptcha.onError(function (err,detail) {
+//            err.method = 'onError';
+//            err.detail = detail;
+//            err = encodeURIComponent(JSON.stringify(err));
+//            document.location = 'shumei://onresult?data='+err;
+//        });
+//    });
 </script>
 <script>
-    var slider = document.getElementById('slider');
-    var piece = document.getElementById('piece');
-    var refreshBtn = document.getElementById('refresh')
-    var arr = [];
-    var timestamp = null;
-    var sliderWidth = 320 - slider.offsetWidth;
-    var currentPageX = 0;
-    var currentPageY = 0
-    var DValueX = 0;
-    var DvalueY = 0;
-    var interval = null;
-    var startFlag = false;
-
-    document.addEventListener('mousedown', function (e) {
-        currentPageX = e.pageX;
-        currentPageY = e.pageY;
-        timestamp = new Date().getTime();
-        if (e.target == slider) {
-            startFlag = true;
-            document.addEventListener('mousemove', handler);
-            interval = setInterval(add, 100)
-        }
-    })
-
-    document.addEventListener('mouseup', function (e) {
-        document.removeEventListener('mousemove', handler)
-        if (startFlag) {
-            add();
-            startFlag = false;
-            console.log(arr);
-        } else {
-            arr = [];
-        }
-        clearInterval(interval);
-    })
-
-    function handler(e) {
-        DValueX = e.pageX - currentPageX;
-        DvalueY = e.pageY - currentPageY;
-        if (DValueX > 0 && DValueX < sliderWidth) {
-            slider.style.marginLeft = DValueX + 'px';
-            piece.style.left = DValueX + 'px';
-        } else if (DValueX <= 0) {
-            slider.style.marginLeft = '0px';
-        } else {
-            slider.style.marginLeft = sliderWidth + 'px';
-        }
-    }
-
-    function caculateTimer() {
-        return new Date().getTime() - timestamp
-    }
-
-    function addPoint(x, y, timer) {
-        arr.push([x, y, timer])
-    }
-
-    function add(bool) {
-        if (bool) {
-            var timer = caculateTimer();
-            addPoint(DValueX, DvalueY, timer);
-        } else {
-            if (arr.length > 100) {
-                return;
-            } else {
-                var timer = caculateTimer();
-                addPoint(DValueX, DvalueY, timer);
+    function deliverNativeParams(nativeParams){
+        nativeParams = JSON.parse(nativeParams);
+        initSMCaptcha({
+            organization: nativeParams.organization, //公司标识
+            appId: nativeParams.appId, //渠道
+            version:'v2.3.5',//js-sdk版本 默认为最新版本
+            timeout: 5000, //超时时间
+            https:false,//是否https协议
+            appendTo:'captcha',//验证码容器id
+            maxRetry:3,
+            data: nativeParams.data||{},//预留字段
+            onError:function (err,detail) {
+                err.method = 'onError';
+                err.detail = detail;
+                err = encodeURIComponent(JSON.stringify(err));
+                document.location = 'shumei://onresult?data='+err;
             }
-        }
+        }, function (SMCaptcha) {
+            SMCaptcha.onSuccess(function(){
+                var result = SMCaptcha.getResult();
+                result.method="onSuccess";
+                result = encodeURIComponent(JSON.stringify(result));
+                document.location = 'shumei://onresult?data='+result;
+            });
+            SMCaptcha.onError(function (err,detail) {
+                err.method = 'onError';
+                err.detail = detail;
+                err = encodeURIComponent(JSON.stringify(err));
+                document.location = 'shumei://onresult?data='+err;
+            });
+        });
     }
 
-    refreshBtn.onclick = function () {
-        slider.style.marginLeft = '0px';
-        piece.style.left = '0px';
-        arr = [];
-        timestamp = null;
-        sliderWidth = 320 - slider.offsetWidth;
-        currentPageX = 0;
-        currentPageY = 0
-        DValueX = 0;
-        DvalueY = 0;
-        interval = null;
-        startFlag = false;
+    function init() {
+        document.location = "shumei://requestnativeparams"
     }
+    init();
 </script>
-
 </html>

@@ -1,55 +1,72 @@
 (function e(t,n,r){function s(o,u){if(!n[o]){if(!t[o]){var a=typeof require=="function"&&require;if(!u&&a)return a(o,!0);if(i)return i(o,!0);var f=new Error("Cannot find module '"+o+"'");throw f.code="MODULE_NOT_FOUND",f}var l=n[o]={exports:{}};t[o][0].call(l.exports,function(e){var n=t[o][1][e];return s(n?n:e)},l,l.exports,e,t,n,r)}return n[o].exports}var i=typeof require=="function"&&require;for(var o=0;o<r.length;o++)s(r[o]);return s})({1:[function(require,module,exports){
 'use strict';
 
-var _jsonp = require('../utils/_jsonp.js');
+var _load = require('../utils/_load.js');
 
-var _jsonp2 = _interopRequireDefault(_jsonp);
+var _load2 = _interopRequireDefault(_load);
 
 var _config = require('../utils/_config.js');
 
 var _config2 = _interopRequireDefault(_config);
 
+var _error = require('../utils/_error.js');
+
+var _functions = require('../utils/_functions.js');
+
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
-var status = {};
-var callbacks = {};
-//报错
-var throwError = function throwError(errorType, config) {
-    var errors = {
-        networkError: '网络错误'
-    };
-    if (typeof config.onError === 'function') {
-        config.onError(errors[errorType]);
-    } else {
-        throw new Error(errors[errorType]);
+/**
+ *  参数校验
+ */
+function checkConfigParams(params) {
+    var organization = params.organization,
+        appId = params.appId;
+
+    var status = false;
+    if (organization == '' || !(0, _functions.isString)(organization)) {
+        status = true;
     }
-};
+    if (appId == '' || !(0, _functions.isString)(appId)) {
+        status = true;
+    }
+    return status;
+}
+
 //初始化验证码
 var initSMCaptcha = function initSMCaptcha(customConfig, callback) {
     var config = new _config2.default(customConfig);
-    if (!customConfig.protocol) {
+    if (checkConfigParams(customConfig)) {
+        (0, _error.throwError)('PARAMS_ERROR', customConfig);
+    }
+    if (!customConfig.https) {
         config.protocol = window.location.protocol + '//';
+    } else {
+        config.protocol = 'https://';
     }
     var sm_apiServer = config.sm_apiServer,
         path = config.path,
         protocol = config.protocol,
-        org = config.org,
-        appId = config.appId;
+        organization = config.organization,
+        appId = config.appId,
+        version = config.version,
+        timeout = config.timeout;
 
-    var jp = new _jsonp2.default({
+
+    var jp = new _load2.default({
         domains: sm_apiServer,
         path: path,
         protocol: protocol,
+        timeout: timeout,
         query: {
-            org: org,
-            appId: appId
+            organization: organization,
+            appId: appId,
+            rversion: version
         }
     });
-    jp.jsonp(function (newConfig) {
-        if (newConfig.code != 1100) {
-            throwError('networkError', config);
+    jp.jsonp(function (status, newConfig) {
+        if (!status) {
+            (0, _error.throwError)('NETWORK_ERROR', customConfig);
         } else {
-
             var detail = newConfig.detail;
             var js = detail.js,
                 domains = detail.domains,
@@ -62,15 +79,19 @@ var initSMCaptcha = function initSMCaptcha(customConfig, callback) {
                 });
                 callback(new window.SMCaptcha(config));
             };
-            var jpSdk = new _jsonp2.default({
+            var jpSdk = new _load2.default({
                 domains: domains,
                 path: js,
                 protocol: protocol,
-                query: null
+                query: {
+                    t: parseInt(Math.random() * 10000) + new Date().valueOf()
+                },
+                timeout: timeout
             });
+
             jpSdk.load(function (err) {
                 if (err) {
-                    throwError('networkError', config);
+                    (0, _error.throwError)('NETWORK_ERROR', customConfig);
                 } else {
                     init();
                 }
@@ -80,7 +101,7 @@ var initSMCaptcha = function initSMCaptcha(customConfig, callback) {
 };
 window.initSMCaptcha = initSMCaptcha;
 
-},{"../utils/_config.js":2,"../utils/_jsonp.js":3}],2:[function(require,module,exports){
+},{"../utils/_config.js":2,"../utils/_error.js":3,"../utils/_functions.js":4,"../utils/_load.js":5}],2:[function(require,module,exports){
 'use strict';
 
 Object.defineProperty(exports, "__esModule", {
@@ -104,7 +125,7 @@ var Config = function () {
     function Config(conf) {
         _classCallCheck(this, Config);
 
-        this.sm_apiServer = ['127.0.0.1:3000'];
+        this.sm_apiServer = ['118.89.223.233'];
         this.protocol = 'https://';
         this.path = '/getResource';
         this._extend(conf);
@@ -126,7 +147,152 @@ var Config = function () {
 
 exports.default = Config;
 
-},{"./_object.js":4}],3:[function(require,module,exports){
+},{"./_object.js":6}],3:[function(require,module,exports){
+"use strict";
+
+Object.defineProperty(exports, "__esModule", {
+    value: true
+});
+exports.throwError = throwError;
+/**
+ * 报错
+ * @type {{NETWORK_ERROR: {code: number, message: string}}}
+ */
+
+var errors = exports.errors = {
+    NETWORK_ERROR: {
+        code: 2001,
+        message: "网络异常"
+    },
+    SERVER_ERROR: {
+        code: 2002,
+        message: "服务器异常"
+    },
+    PARAMS_ERROR: {
+        code: 2003,
+        message: "参数异常"
+    }
+};
+
+function throwError(errorType, config) {
+    if (config && typeof config.onError === 'function') {
+        config.onError(errors[errorType]);
+    } else {
+        throw new Error(errors[errorType]);
+    }
+}
+
+},{}],4:[function(require,module,exports){
+'use strict';
+
+Object.defineProperty(exports, "__esModule", {
+    value: true
+});
+
+var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol" ? function (obj) { return typeof obj; } : function (obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj; };
+
+exports.isNumber = isNumber;
+exports.isString = isString;
+exports.isBoolean = isBoolean;
+exports.isObject = isObject;
+exports.isFunction = isFunction;
+exports.normalizeDomain = normalizeDomain;
+exports.normalizePath = normalizePath;
+exports.normalizeQuery = normalizeQuery;
+exports.makeURL = makeURL;
+exports.IsPC = IsPC;
+
+var _object = require('./_object.js');
+
+var _object2 = _interopRequireDefault(_object);
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+/**
+ * 判断类型
+ */
+function isNumber(v) {
+    return typeof v === 'number';
+}
+
+function isString(v) {
+    return typeof v === 'string';
+}
+
+function isBoolean(v) {
+    return typeof v === 'boolean';
+}
+
+function isObject(v) {
+    return (typeof v === 'undefined' ? 'undefined' : _typeof(v)) === 'object' && v !== null;
+}
+
+function isFunction(v) {
+    return typeof v === 'function';
+}
+
+/**
+ * 格式化域名
+ * @param {*} domain
+ */
+function normalizeDomain(domain) {
+    return domain.replace(/^https?:\/\/|\/$/g, '');
+}
+
+//路径格式化
+function normalizePath(path) {
+    path = path.replace(/\/+/g, '/');
+    if (path.indexOf('/') !== 0) {
+        path = '/' + path;
+    }
+    return path;
+}
+//格式化query
+function normalizeQuery(query) {
+    if (!query) {
+        return '';
+    }
+    var q = '?';
+    new _object2.default(query)._each(function (key, value) {
+        if (isString(value) || isNumber(value) || isBoolean(value)) {
+            q = q + encodeURIComponent(key) + '=' + encodeURIComponent(value) + '&';
+        }
+    });
+    if (q === '?') {
+        q = '';
+    }
+    return q.replace(/&$/, '');
+}
+//格式化url
+function makeURL(protocol, domain, path, query) {
+    domain = normalizeDomain(domain);
+
+    var url = normalizePath(path) + normalizeQuery(query);
+    if (domain) {
+        url = protocol + domain + url;
+    }
+    return url;
+}
+
+/**
+ * 是否是移动端
+ * @returns {boolean}
+ * @constructor
+ */
+function IsPC() {
+    var userAgentInfo = navigator.userAgent;
+    var Agents = ["Android", "iPhone", "SymbianOS", "Windows Phone", "iPad", "iPod"];
+    var flag = true;
+    for (var v = 0; v < Agents.length; v++) {
+        if (userAgentInfo.indexOf(Agents[v]) > 0) {
+            flag = false;
+            break;
+        }
+    }
+    return flag;
+}
+
+},{"./_object.js":6}],5:[function(require,module,exports){
 'use strict';
 
 Object.defineProperty(exports, "__esModule", {
@@ -135,7 +301,7 @@ Object.defineProperty(exports, "__esModule", {
 
 var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
 
-var _type = require('./_type.js');
+var _functions = require('./_functions.js');
 
 var _object = require('./_object.js');
 
@@ -148,115 +314,69 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
 /**
  * jsonp
  */
-var jsonp = function () {
+var Load = function () {
     //构造函数，config配置参数
-    function jsonp(config) {
+    function Load(config) {
         var _this = this;
 
-        _classCallCheck(this, jsonp);
+        _classCallCheck(this, Load);
 
         this._config = {
             domains: [],
             protocol: '',
             path: '',
-            query: {}
+            query: {},
+            onError: config.onError || null,
+            status: 'loading',
+            timeout: config.timeout || 30000,
+            timer: null
         };
-        this.status = false;
         new _object2.default(config)._each(function (key, value) {
             _this._config[key] = value;
         });
     }
     /**
-     * 获取状态
+     * 获取随机数
      */
 
 
-    _createClass(jsonp, [{
-        key: 'getStatus',
-        value: function getStatus() {
-            return this.status;
-        }
-        /**
-         * 获取随机数
-         */
-
-    }, {
+    _createClass(Load, [{
         key: 'random',
         value: function random() {
             return parseInt(Math.random() * 10000) + new Date().valueOf();
         }
-        /**
-         * 格式化域名
-         * @param {*} domain 
-         */
+        //加载script文件
 
-    }, {
-        key: 'normalizeDomain',
-        value: function normalizeDomain(domain) {
-            return domain.replace(/^https?:\/\/|\/$/g, '');
-        }
-
-        //路径格式化
-
-    }, {
-        key: 'normalizePath',
-        value: function normalizePath(path) {
-            path = path.replace(/\/+/g, '/');
-            if (path.indexOf('/') !== 0) {
-                path = '/' + path;
-            }
-            return path;
-        }
-    }, {
-        key: 'normalizeQuery',
-
-        //格式化query
-        value: function normalizeQuery(query) {
-            if (!query) {
-                return '';
-            }
-            var q = '?';
-            new _object2.default(query)._each(function (key, value) {
-                if ((0, _type.isString)(value) || (0, _type.isNumber)(value) || (0, _type.isBoolean)(value)) {
-                    q = q + encodeURIComponent(key) + '=' + encodeURIComponent(value) + '&';
-                }
-            });
-            if (q === '?') {
-                q = '';
-            }
-            return q.replace(/&$/, '');
-        }
-    }, {
-        key: 'makeURL',
-
-        //格式化url
-        value: function makeURL(protocol, domain, path, query) {
-            domain = this.normalizeDomain(domain);
-
-            var url = this.normalizePath(path) + this.normalizeQuery(query);
-            if (domain) {
-                url = protocol + domain + url;
-            }
-
-            return url;
-        }
     }, {
         key: 'loadScript',
-
-        //加载script文件
         value: function loadScript(url, cb) {
+            var self = this;
+            var _self$_config = self._config,
+                timeout = _self$_config.timeout,
+                timer = _self$_config.timer;
+
             var script = document.createElement("script");
             var head = document.getElementsByTagName("head")[0];
             script.charset = "UTF-8";
             script.async = true;
             script.onerror = function () {
+                self._config.status = 'error';
+                window.clearTimeout(timer);
                 cb(true);
             };
-            this.status = false;
+            this.timeOutFun(timeout, function (err) {
+                if (err && self._config.status !== 'loaded') {
+                    self._config.status = 'error';
+                    script.onerror = null;
+                    cb(true);
+                }
+            });
+            self._config.status = 'load';
+
             //解决浏览器兼容问题
             script.onload = script.onreadystatechange = function () {
                 if (!this.status && (!script.readyState || "loaded" === script.readyState || "complete" === script.readyState)) {
-                    this.status = true;
+                    self._config.status = 'loaded';
                     setTimeout(function () {
                         cb(false);
                     }, 0);
@@ -279,7 +399,7 @@ var jsonp = function () {
                 query = _config.query;
 
             var tryRequest = function tryRequest(at) {
-                var url = _this2.makeURL(protocol, domains[at], path, query);
+                var url = (0, _functions.makeURL)(protocol, domains[at], path, query);
                 _this2.loadScript(url, function (err) {
                     if (err) {
                         if (at >= domains.length - 1) {
@@ -295,18 +415,24 @@ var jsonp = function () {
             tryRequest(0);
         }
     }, {
+        key: 'timeOutFun',
+        value: function timeOutFun(timeout, cb) {
+            this._config.timer && window.clearTimeout(this._config.timer);
+            this._config.timer = setTimeout(function () {
+                cb(true);
+            }, timeout);
+        }
+    }, {
         key: 'jsonp',
 
         //jsonp
         value: function jsonp(callback) {
-            var _this3 = this;
-
             var query = this._config.query;
 
             var cb = "smcb_" + this.random();
             query.callback = cb;
             window[cb] = function (data) {
-                callback(data);
+                callback(true, data);
                 window[cb] = undefined;
                 try {
                     delete window[cb];
@@ -314,19 +440,22 @@ var jsonp = function () {
             };
             this.load(function (err) {
                 if (err) {
-                    callback(_this3._config);
+                    window[cb] = function () {
+                        return false;
+                    };
+                    callback(false, {});
                 }
             });
         }
     }]);
 
-    return jsonp;
+    return Load;
 }();
 
-exports.default = jsonp;
+exports.default = Load;
 ;
 
-},{"./_object.js":4,"./_type.js":5}],4:[function(require,module,exports){
+},{"./_functions.js":4,"./_object.js":6}],6:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -364,42 +493,5 @@ var _Object = function () {
 }();
 
 exports.default = _Object;
-
-},{}],5:[function(require,module,exports){
-'use strict';
-
-Object.defineProperty(exports, "__esModule", {
-    value: true
-});
-
-var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol" ? function (obj) { return typeof obj; } : function (obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj; };
-
-exports.isNumber = isNumber;
-exports.isString = isString;
-exports.isBoolean = isBoolean;
-exports.isObject = isObject;
-exports.isFunction = isFunction;
-/**
- * 判断类型
- */
-function isNumber(v) {
-    return typeof v === 'number';
-}
-
-function isString(v) {
-    return typeof v === 'string';
-}
-
-function isBoolean(v) {
-    return typeof v === 'boolean';
-}
-
-function isObject(v) {
-    return (typeof v === 'undefined' ? 'undefined' : _typeof(v)) === 'object' && v !== null;
-}
-
-function isFunction(v) {
-    return typeof v === 'function';
-}
 
 },{}]},{},[1]);

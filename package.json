@@ -5,9 +5,9 @@
   "main": "index.js",
   "scripts": {
     "watch-smcp": "gulp watch --entry smcp",
-    "build-smcp": "gulp build --entry smcp",
     "watch-sdk": "gulp watch --entry sdk",
-    "build-sdk": "gulp build --entry sdk"
+    "watch": "gulp watch",
+    "build":"gulp build"
   },
   "author": "zdxxxxxx",
   "license": "ISC",
@@ -21,6 +21,9 @@
     "vinyl-source-stream": "^1.1.0"
   },
   "dependencies": {
-    "express": "^4.15.3"
+    "express": "^4.15.3",
+    "gulp-css-spriter": "^0.4.0",
+    "gulp-minify-css": "^1.2.4",
+    "vinyl-buffer": "^1.0.0"
   }
 }

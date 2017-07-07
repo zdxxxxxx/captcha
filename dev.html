@@ -1,0 +1,109 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>SMCaptcha</title>
+</head>
+<style>
+    * {
+        margin: 0;
+        padding: 0;
+    }
+    html,body{
+        height: 400px;
+        width: 300px;
+        overflow-y:auto ;
+    }
+    .captcha-container{
+        width: 100%;
+        height: 100%;
+        margin: 0 auto;
+    }
+</style>
+<body>
+<div id="captcha" class="captcha-container">
+
+</div>
+
+</body>
+<script src="build/smcp/smcp.js"></script>
+<script>
+        initSMCaptcha({
+            organization: 'IkzxwQ4vofwwvFqC8ir2', //公司标识
+            appId: '123', //渠道
+            version:'v2.3.5',//js-sdk版本 默认为最新版本
+            timeout: 5000, //超时时间
+            https:false,//是否https协议
+            appendTo:'captcha',//验证码容器id
+            data: {
+                deviceId:"xxxxx"
+            },//预留字段
+            maxRetry:3,
+            onError:function (err,detail) {
+                err.method = 'onError';
+                err.detail = detail;
+                console.log(err);
+                err = encodeURIComponent(JSON.stringify(err));
+                //document.location = 'shumei://onresult?data='+err;
+            }
+        }, function (SMCaptcha) {
+            SMCaptcha.onSuccess(function(){
+                var result = SMCaptcha.getResult();
+                result.method="onSuccess";
+                result = encodeURIComponent(JSON.stringify(result));
+                //document.location = 'shumei://onresult?data='+result;
+            });
+            SMCaptcha.onError(function (err,detail) {
+                err.method = 'onError';
+                err.detail = detail;
+                console.log(err);
+                err = encodeURIComponent(JSON.stringify(err));
+                //document.location = 'shumei://onresult?data='+err;
+            });
+        });
+//    function deliverNativeParams(nativeParams){
+//        nativeParams = JSON.parse(nativeParams);
+//        initSMCaptcha({
+//            organization: nativeParams.organization||'IkzxwQ4vofwwvFqC8ir2', //公司标识
+//            appId: nativeParams.appId||'123', //渠道
+//            width: 'auto', //宽度
+//            version:'v2.3.5',//js-sdk版本 默认为最新版本
+//            timeout: 5000, //超时时间
+//            https:false,//是否https协议
+//            appendTo:'captcha',//验证码容器id
+//            data: {},//预留字段
+//            onError:function (err) {
+//                err.method = 'onError';
+//                err = encodeURIComponent(JSON.stringify(err));
+//                document.location = 'shumei://onresult?data='+err;
+//            }
+//        }, function (SMCaptcha) {
+//            SMCaptcha.onSuccess(function(){
+//                var result = SMCaptcha.getResult();
+//                result.method="onSuccess";
+//                result = encodeURIComponent(JSON.stringify(result));
+//                document.location = 'shumei://onresult?data='+result;
+//            });
+//            SMCaptcha.onError(function (err,data) {
+//                err.method = 'onError';
+//                err.data = data;
+//                err = encodeURIComponent(JSON.stringify(err));
+//                document.location = 'shumei://onresult?data='+err;
+//            });
+//        });
+//    }
+//
+//    function init() {
+//        document.location = "shumei://requestnativeparams"
+//    }
+//
+//    init();
+</script>
+<script>
+
+
+</script>
+</html>

@@ -1,16 +1,153 @@
+//工具
+import {makeURL,isString,isNumber} from '../utils/_functions.js'
+import _Object from '../utils/_object.js'
+import {register} from '../utils/_api.js'
+import Captcha from '../utils/_captcha.js'
+import {throwError} from '../utils/_error.js'
+let status = false;
+let DEBUG = false;
+
+function load({domains,path,protocol,query,callback}){
+    let tryRequest = (at) => {
+        let url = makeURL(protocol, domains[at], path, query);
+        loadCss(url, (err) => {
+            if (err) {
+                if (at >= domains.length - 1) {
+                    callback(true);
+                } else {
+                    tryRequest(at + 1);
+                }
+            } else {
+                callback(false);
+            }
+        });
+    };
+    tryRequest(0);
+}
+
+function loadCss(url,cb){
+    let link = document.createElement("link");
+    let head = document.getElementsByTagName("head")[0];
+    link.rel = "stylesheet";
+
+    link.onerror = function () {
+        cb(true);
+    };
+    status = false;
+
+    //解决浏览器兼容问题
+    link.onload = link.onreadystatechange = function () {
+        if (!this.status &&
+            (!link.readyState ||
+            "loaded" === link.readyState ||
+            "complete" === link.readyState)) {
+            status = true;
+            setTimeout(function () {
+                cb(false);
+            }, 0);
+        }
+    };
+    link.href = url+"?t="+(parseInt(Math.random() * 10000) + (new Date()).valueOf());
+    head.appendChild(link);
+}
+
+
+
 /**
  * sdk
  */
 class SMCaptcha {
-    constructor() {
-        this.rid = "xxxxx"
-    }
-    getResult() {
 
+    constructor(config) {
+        this._config = {};
+        new _Object(config)._each((key,value)=>{
+            this._config[key] = value;
+        });
+        this.checkConfigParams(this._config)
+        let {domains,css,protocol,appendTo} = this._config;
+        this.defaultKey = 'sshummei';
+        this._result = null;
+        this.captchaData = null;
+        this.retry = 0;
+        this._smApi = {
+            domain:'123.206.13.134',
+            register:'/ca/v1/register',
+            check:'/ca/v1/fverify'
+        };
+
+        load({
+            domains,
+            path:css,
+            protocol,
+            query:null,
+            callback:(err)=>{
+                if(err){
+                    throwError('NETWORK_ERROR',this._config,{message:'load css error'})
+                }else{
+                    this.cp = new Captcha({
+                        rootDom:appendTo,
+                        SMCaptcha:this,
+                        protocol
+                    });
+                    this.reset();
+                }
+            }
+        });
     }
+    /**
+     *  参数校验
+     */
+    checkConfigParams(){
+        let {appendTo,timeout,maxRetry} = this._config;
+        if(appendTo==''||!isString(appendTo)){
+            throwError('PARAMS_ERROR',this._config,{message:'appendTo error'})
+        }
+        if(timeout&&isString(timeout)){
+            this._config.timeout = 30000;
+        }
+        if(!maxRetry||!isNumber(maxRetry)){
+            this._config.maxRetry = 3;
+        }
+    }
+    /**
+     * 成功后回调
+     * @param cb
+     */
+    onSuccess(cb){
+        this._config['onSuccess'] = cb
+    }
+
+    /**
+     * 准备好后回调
+     * @param cb
+     */
+    onReady(cb){
+        this._config['onReady'] = cb
+    }
+
+    /**
+     * 服务端异常
+     * @param cb
+     */
+    onError(cb){
+        this._config['onError'] = cb
+    }
+
+    /**
+     * 取结果
+     * @returns {{organization: *, appId: *}|*}
+     */
+    getResult() {
+        return this._result
+    }
+
+    /**
+     * 刷新验证码
+     */
     reset() {
-        console.log('SMCaptcha.reset drived!')
+        register.bind(this)()
     }
+
 }
 
-window.SMCaptcha = SMCaptcha
+window.SMCaptcha = SMCaptcha;
