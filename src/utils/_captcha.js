@@ -142,8 +142,8 @@ export default class Captcha{
         let {SMCaptcha} = this._config;
         window.clearTimeout(self.timer);
         if(this.ImgStack.bg&&this.ImgStack.fg){
+            SliderText.innerText= '向右滑动完成拼图';
             setTimeout(()=>{
-                SliderText.innerText= '向右滑动完成拼图';
                 CaptchaWrapper.classList.remove(this.prefix + 'loading');
                 if(isFunction(SMCaptcha._config['onReady'])) {
                     SMCaptcha._config['onReady']();
