@@ -142,8 +142,8 @@ export default class Captcha{
         let {SMCaptcha} = this._config;
         window.clearTimeout(self.timer);
         if(this.ImgStack.bg&&this.ImgStack.fg){
-            SliderText.innerText= '向右滑动完成拼图';
             setTimeout(()=>{
+                SliderText.innerText= '向右滑动完成拼图';
                 CaptchaWrapper.classList.remove(this.prefix + 'loading');
                 if(isFunction(SMCaptcha._config['onReady'])) {
                     SMCaptcha._config['onReady']();
@@ -168,9 +168,8 @@ export default class Captcha{
      *
      */
     moving(){
-        let {CaptchaWrapper,SliderIcon,SliderText} =this.elements;
+        let {CaptchaWrapper,SliderIcon} =this.elements;
         CaptchaWrapper.classList.add(this.prefix + 'moving');
-        SliderText.innerText = '';
         SliderIcon.innerHTML = this.svgs.movingRight;
     }
 

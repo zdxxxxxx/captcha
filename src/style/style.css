@@ -108,7 +108,9 @@
       left: 50%;
       margin-top: -20px;
       margin-left: -15px;
-      animation: loading .8s linear infinite;
+      -webkit-animation:loading .8s linear infinite;
+      -o-animation:loading .8s linear infinite;
+      animation:loading .8s linear infinite;
   }
   .SMCaptcha-img-wrapper .SMCaptcha-loading-box .SMCaptcha-loading-text{
       position: absolute;
@@ -147,6 +149,12 @@
 
   .SMCaptcha-captcha-wrapper.SMCaptcha-moving .SMCaptcha-slider{
       background-color: #108EE9;
+  }
+  .SMCaptcha-captcha-wrapper.SMCaptcha-moving .SMCaptcha-slider-text,
+  .SMCaptcha-captcha-wrapper.SMCaptcha-success .SMCaptcha-slider-text,
+  .SMCaptcha-captcha-wrapper.SMCaptcha-fail .SMCaptcha-slider-text
+  {
+      display: none;
   }
   .SMCaptcha-captcha-wrapper.SMCaptcha-moving .SMCaptcha-slider-process{
       border-color: #108EE9;
