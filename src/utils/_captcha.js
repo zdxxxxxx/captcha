@@ -31,7 +31,9 @@ export default class Captcha{
             success:'<svg class="SMCaptcha-icon-svg" viewBox="0 0 1024 1024" version="1.1" xmlns="http://www.w3.org/2000/svg" p-id="5891" xmlns:xlink="http://www.w3.org/1999/xlink" ><path d="M332.475765 767.674077c-1.989307-1.989307-1.990331-5.245468 0-7.234775L892.385938 200.540386c1.989307-1.990331 5.245468-1.990331 7.235798 0l55.778374 55.774281c1.989307 1.989307 1.989307 5.245468 0 7.235798L395.502217 823.458591c-1.990331 1.989307-5.245468 1.989307-7.235798 0L332.475765 767.674077z" p-id="5892" fill="#ffffff"></path><path d="M383.675868 819.519886c-1.989307 1.990331-5.245468 1.990331-7.235798 0.001023l-307.841204-307.851437c-1.990331-1.990331-1.989307-5.245468 0-7.235798l55.783491-55.773258c1.989307-1.989307 5.245468-1.989307 7.235798 0l307.836087 307.829947c1.990331 1.989307 1.990331 5.245468 0 7.235798L383.675868 819.519886z" p-id="5893" fill="#ffffff"></path></svg>',
             loadFail:'<svg class="SMCaptcha-icon-svg" viewBox="0 0 1024 1024" version="1.1" xmlns="http://www.w3.org/2000/svg" p-id="7160" xmlns:xlink="http://www.w3.org/1999/xlink" width="32" height="32"><path d="M317.952 316.928h241.152c12.8-7.68 23.04-19.968 15.36-39.424-8.704-22.016-27.648-37.888-40.96-58.368-22.528-34.304-17.92-85.504 10.752-115.2 31.744-32.768 83.968-30.208 83.968-30.208s51.712-3.072 83.456 30.208c28.672 29.696 32.768 80.896 10.752 115.2-13.312 20.48-32.768 36.352-41.472 58.368-7.68 19.456 3.072 31.744 15.36 39.424h247.296v235.52c-7.168 11.264-18.944 19.968-36.352 13.312-20.992-8.192-35.84-26.624-55.296-38.912-32.256-20.992-80.896-16.896-109.056 10.24-31.232 30.208-28.672 79.36-28.672 79.36s-2.56 49.152 28.672 79.36c28.16 27.136 76.8 31.232 109.056 10.24 19.456-12.8 34.304-30.72 55.296-38.912 17.408-6.656 28.672 2.048 36.352 12.8V931.84H680.96c-9.728-7.168-16.896-17.92-10.752-33.792 8.192-20.48 25.6-34.816 38.4-53.76 20.48-31.744 16.896-79.36-9.728-106.496-29.696-30.72-77.312-27.648-77.312-27.648s-48.128-2.56-77.312 27.648c-26.624 27.648-30.72 74.752-9.728 106.496 12.288 18.944 30.208 33.28 37.888 53.76 6.144 15.872-1.024 26.624-10.752 33.792H317.952v-236.032c-7.68-13.824-20.992-26.112-41.472-17.92-22.528 9.216-38.912 28.672-59.904 42.496-35.328 23.04-88.576 18.432-118.784-10.752-34.304-32.768-31.232-86.528-31.232-86.528s-3.072-53.248 31.232-86.528c30.72-29.696 83.456-34.304 118.784-10.752 20.992 13.824 37.376 33.792 59.904 42.496 20.992 8.192 33.792-4.096 41.472-17.92V316.928z" fill="#000000" p-id="7161"></path></svg>'
         };
+
         this.appendDom(rootDom);
+
         this.elements={
             root:document.getElementById(rootDom),
             CaptchaWrapper:this.getElementById('captcha-root'),
@@ -48,7 +50,9 @@ export default class Captcha{
             LoadingIcon:this.getElementById('loading-icon'),
 
         };
+
         this.setDefaultView();
+
         this.bindEvent();
     }
 
@@ -274,9 +278,6 @@ export default class Captcha{
      * 绑定事件
      */
     bindEvent(){
-        document.querySelector('body').addEventListener('touchstart', function (e) {
-            e.preventDefault();
-        });
         let self = this;
         let {CaptchaWrapper,Piece,Slider,SliderIcon,SliderProcess} = this.elements;
         let {SMCaptcha} = this._config;
@@ -299,8 +300,14 @@ export default class Captcha{
             moveEndHandler:moveEndHandler,
             refresh:refresh
         };
-        SliderIcon.addEventListener(method[0], moveStartHandler);
-
+        document.querySelector('body').addEventListener(method[0], function (e) {
+            e.preventDefault();
+        });
+        if(!IsPC){
+            SliderIcon.addEventListener(method[0], moveStartHandler);
+        }else{
+            SliderIcon.addEventListener(method[0], moveStartHandler);
+        }
         /**
          * moveEnd
          * @param e
@@ -330,6 +337,7 @@ export default class Captcha{
                 return
             }
             target = e.target;
+
             if(!IsPC()){
                 currentPageX = e.touches[0].pageX;
                 currentPageY = e.touches[0].pageY;

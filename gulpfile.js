@@ -64,7 +64,7 @@ gulp.task('build-css', function() {
     return gulp.src('src/style/style.css')
         .pipe(minifyCSS())
         .pipe(rename(`style.min.css`))
-        .pipe(gulp.dest('dist/style')); //最后生成出来
+        .pipe(gulp.dest('dist/')); //最后生成出来
 });
 // smcp.min.js
 gulp.task("browserify-a", function () {
@@ -79,7 +79,7 @@ gulp.task("browserify-a", function () {
         .pipe(source(`smcp.min.js`))
         .pipe(buffer())
         .pipe(uglify())
-        .pipe(gulp.dest(`dist/smcp/`));
+        .pipe(gulp.dest(`dist/`));
 });
 
 
@@ -96,7 +96,7 @@ gulp.task("browserify-b", function () {
         .pipe(source(`sdk.min.js`))
         .pipe(buffer())
         .pipe(uglify())
-        .pipe(gulp.dest(`dist/sdk/`));
+        .pipe(gulp.dest(`dist/`));
 });
 
 
