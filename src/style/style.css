@@ -108,9 +108,10 @@
       left: 50%;
       margin-top: -20px;
       margin-left: -15px;
-      -webkit-animation:loading .8s linear infinite;
-      -o-animation:loading .8s linear infinite;
-      animation:loading .8s linear infinite;
+      -webkit-animation:SMCaptcha-captcha-loading-animate .8s linear infinite;
+      -o-animation:SMCaptcha-captcha-loading-animate .8s linear infinite;
+      -moz-animation:SMCaptcha-captcha-loading-animate .8s linear infinite;
+      animation:SMCaptcha-captcha-loading-animate .8s linear infinite;
   }
   .SMCaptcha-img-wrapper .SMCaptcha-loading-box .SMCaptcha-loading-text{
       position: absolute;
@@ -176,13 +177,19 @@
       background: #fcdbd9;
   }
 
-  @keyframes loading {
+  @keyframes SMCaptcha-captcha-loading-animate {
       0% {
           -webkit-transform: rotate(0deg);
+          -ms-transform: rotate(0deg);
+          -moz-transform: rotate(0deg);
+          -o-transform: rotate(0deg);
           transform: rotate(0deg);
       }
       100% {
           -webkit-transform: rotate(1turn);
+          -ms-transform: rotate(1turn);
+          -moz-transform: rotate(1turn);
+          -o-transform: rotate(1turn);
           transform: rotate(1turn);
       }
   }

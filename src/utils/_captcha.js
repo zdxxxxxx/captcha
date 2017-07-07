@@ -48,7 +48,6 @@ export default class Captcha{
             SliderProcess:this.getElementById('slider-process'),
             LoadingText:this.getElementById('loading-text'),
             LoadingIcon:this.getElementById('loading-icon'),
-
         };
 
         this.setDefaultView();
@@ -307,6 +306,7 @@ export default class Captcha{
         }else{
             SliderIcon.addEventListener(method[0], moveStartHandler);
         }
+
         /**
          * moveEnd
          * @param e

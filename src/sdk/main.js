@@ -26,15 +26,23 @@ function load({domains,path,protocol,query,callback}){
 }
 
 function loadCss(url,cb){
-    let link = document.createElement("link");
-    let head = document.getElementsByTagName("head")[0];
-    link.rel = "stylesheet";
+    //fix 移动端不执行link 监听事件的bug
+    let timer = setTimeout(function () {
+        let i = document.styleSheets.length;
+        for(let k=0;k<i;k++){
+            if(document.styleSheets[k].href.indexOf(url)>-1){
+                cb(false)
+            }
+        }
+    },1000);
 
+    let link = document.createElement("link");
+    link.rel = "stylesheet";
     link.onerror = function () {
         cb(true);
+        window.clearTimeout(timer)
     };
     status = false;
-
     //解决浏览器兼容问题
     link.onload = link.onreadystatechange = function () {
         if (!this.status &&
@@ -42,13 +50,27 @@ function loadCss(url,cb){
             "loaded" === link.readyState ||
             "complete" === link.readyState)) {
             status = true;
+            window.clearTimeout(timer);
             setTimeout(function () {
                 cb(false);
             }, 0);
         }
     };
+
+
     link.href = url+"?t="+(parseInt(Math.random() * 10000) + (new Date()).valueOf());
-    head.appendChild(link);
+
+    (function() {
+        let head = document.getElementsByTagName('head')[0] || document.documentElement;
+        if(!head) {
+            setTimeout(arguments.callee, 10);
+            return;
+        }
+        //自定义协议跳转 无法解释的bug
+        setTimeout(() => {
+            head.insertBefore(link, head.firstChild);
+        }, 0);
+    })();
 }
 
 
@@ -57,7 +79,6 @@ function loadCss(url,cb){
  * sdk
  */
 class SMCaptcha {
-
     constructor(config) {
         this._config = {};
         new _Object(config)._each((key,value)=>{
@@ -74,7 +95,6 @@ class SMCaptcha {
             register:'/ca/v1/register',
             check:'/ca/v1/fverify'
         };
-
         load({
             domains,
             path:css,

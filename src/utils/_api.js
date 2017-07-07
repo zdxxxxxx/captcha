@@ -7,7 +7,7 @@ import {DES,base64Decode,base64Encode} from './_des.js'
  * @param conf
  */
 export function register() {
-    let {protocol,organization,appId,data} = this._config;
+    let {protocol,organization,appId,customData} = this._config;
     let {domain,register} = this._smApi;
     let cp = this.cp;
     let conf = {
@@ -17,14 +17,14 @@ export function register() {
         query:{
             organization:organization,
             appId:appId,
-            data:JSON.stringify(data),
-            cs:''
+            data:JSON.stringify(customData),
         }
     };
     cp.loading();
     let jsp = new JsonP(conf);
     jsp.jsonp((status,data)=>{
         if(!status){
+            cp.loadFail();
             throwError('NETWORK_ERROR',this._config,{message:'register api error'});
         }else{
             let {code,detail} = data;
@@ -74,12 +74,12 @@ export function check(postData) {
             appId:appId,
             act:postAct,
             rid,
-            cs:''
         }
     };
     let jsp = new JsonP(conf);
     jsp.jsonp((status,data)=>{
         if(!status){
+            this.cp.loadFail();
             throwError('NETWORK_ERROR',this._config,data,'fv api error');
         }else{
             let {code,riskLevel} = data;

@@ -25,44 +25,11 @@
 
 <body>
     <div id="captcha" class="captcha-container">
-
     </div>
-
 </body>
 <script src="dist/smcp.min.js"></script>
 
 
-<script>
-//    initSMCaptcha({
-//        organization: 'IkzxwQ4vofwwvFqC8ir2', //公司标识
-//        appId: 'xxxxxxxxx', //渠道
-//        version:'v2.3.5',//js-sdk版本 默认为最新版本
-//        timeout: 5000, //超时时间
-//        https:false,//是否https协议
-//        appendTo:'captcha',//验证码容器id
-//        maxRetry:3,
-//        data: {},//预留字段
-//        onError:function (err,detail) {
-//            err.method = 'onError';
-//            err.detail = detail;
-//            err = encodeURIComponent(JSON.stringify(err));
-//            document.location = 'shumei://onresult?data='+err;
-//        }
-//    }, function (SMCaptcha) {
-//        SMCaptcha.onSuccess(function(){
-//            var result = SMCaptcha.getResult();
-//            result.method="onSuccess";
-//            result = encodeURIComponent(JSON.stringify(result));
-//            document.location = 'shumei://onresult?data='+result;
-//        });
-//        SMCaptcha.onError(function (err,detail) {
-//            err.method = 'onError';
-//            err.detail = detail;
-//            err = encodeURIComponent(JSON.stringify(err));
-//            document.location = 'shumei://onresult?data='+err;
-//        });
-//    });
-</script>
 <script>
     function deliverNativeParams(nativeParams){
         nativeParams = JSON.parse(nativeParams);
@@ -74,7 +41,7 @@
             https:false,//是否https协议
             appendTo:'captcha',//验证码容器id
             maxRetry:3,
-            data: nativeParams.data||{},//预留字段
+            customData: nativeParams.data||{},//预留字段
             onError:function (err,detail) {
                 err.method = 'onError';
                 err.detail = detail;
@@ -96,7 +63,6 @@
             });
         });
     }
-
     function init() {
         document.location = "shumei://requestnativeparams"
     }
