@@ -28,11 +28,6 @@ export default class Load {
     random() {
         return parseInt(Math.random() * 10000) + (new Date()).valueOf();
     }
-    log(msg){
-        let div = document.createElement('div');
-        div.innerText = msg;
-        document.getElementById('log').appendChild(div);
-    }
     //加载script文件
     loadScript(url, cb) {
         let self = this;
@@ -50,7 +45,6 @@ export default class Load {
         script.onerror = function () {
             self._config.status = 'error';
             window.clearTimeout(self._config.timer);
-            self.log('error!');
             cb(true);
         };
 

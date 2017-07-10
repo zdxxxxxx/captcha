@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>SMCaptcha</title>
+</head>
+<style>
+    * {
+        margin: 0;
+        padding: 0;
+    }
+    html,body{
+        width: 100%;
+        height: 100%;
+    }
+    .captcha-container{
+        width: 100%;
+        height: 100%;
+        margin: 0 auto;
+    }
+</style>
+
+<body>
+    <div id="captcha" class="captcha-container">
+    </div>
+</body>
+<script src="http://castatic.fengkongcloud.com/pr/v1/smcp.min.js"></script>
+<script>
+    window.onload = function () {
+        if(window.initSMCaptcha === undefined||typeof window.initSMCaptcha !=='function'){
+            var err = {
+                method:'onError',
+                code:'2004',
+                message:'初始化失败'
+            };
+            console.log(err);
+            err = encodeURIComponent(JSON.stringify(err));
+            document.location = 'shumei://onresult?data='+err;
+        }else{
+            init();
+        }
+    };
+    function deliverNativeParams(nativeParams){
+        nativeParams = JSON.parse(nativeParams);
+        initSMCaptcha({
+            organization: nativeParams.organization, //公司标识
+            appId: nativeParams.appId, //渠道
+            https:false,//是否https协议
+            appendTo:'captcha',//验证码容器id
+            maxRetry:3,
+            customData: nativeParams.data||{},//预留字段
+            onError:function (err,detail) {
+                err.method = 'onError';
+                err.detail = detail;
+                err = encodeURIComponent(JSON.stringify(err));
+                document.location = 'shumei://onresult?data='+err;
+            }
+        }, function (SMCaptcha) {
+            SMCaptcha.onSuccess(function(){
+                var result = SMCaptcha.getResult();
+                result.method="onSuccess";
+                result = encodeURIComponent(JSON.stringify(result));
+                document.location = 'shumei://onresult?data='+result;
+            });
+            SMCaptcha.onError(function (err,detail) {
+                err.method = 'onError';
+                err.detail = detail;
+                err = encodeURIComponent(JSON.stringify(err));
+                document.location = 'shumei://onresult?data='+err;
+            });
+        });
+    }
+    function init() {
+        document.location = "shumei://requestnativeparams"
+    }
+</script>
+</html>

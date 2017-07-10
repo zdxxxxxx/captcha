@@ -2,7 +2,7 @@ import Load from '../utils/_load.js'
 import {throwError} from '../utils/_error.js';
 import {isString} from '../utils/_functions.js';
 import _Object from '../utils/_object.js'
-
+import {SM_API} from '../utils/_config.js'
 /**
  *  参数校验
  */
@@ -22,9 +22,9 @@ function checkConfigParams(params){
  */
 class Config {
     constructor(conf) {
-        this.sm_apiServer = ['118.89.223.233'];
+        this.sm_apiServer = [SM_API.domain];
         this.protocol = 'https://';
-        this.path = '/getResource';
+        this.path = SM_API.conf;
         this._extend(conf);
     }
     _extend(obj) {

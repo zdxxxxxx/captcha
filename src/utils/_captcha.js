@@ -48,6 +48,7 @@ export default class Captcha{
             SliderProcess:this.getElementById('slider-process'),
             LoadingText:this.getElementById('loading-text'),
             LoadingIcon:this.getElementById('loading-icon'),
+            SMCaptchaMarginBox:this.getElementById('margin-box')
         };
 
         this.setDefaultView();
@@ -68,34 +69,7 @@ export default class Captcha{
      * @param root
      */
     appendDom(root){
-        let htmlText = "<div class='SMCaptcha-captcha-wrapper ' id='SMCaptcha-captcha-root'>" +
-            "<div class='SMCaptcha-img-wrapper' id='SMCaptcha-img-con'>" +
-            "<div class='SMCaptcha-bg-wrapper' id='SMCaptcha-bg-con'>" +
-            "<img src='' alt='' id='SMCaptcha-bg-img'>" +
-            "</div>" +
-            "<div class='SMCaptcha-piece-wrapper' id='SMCaptcha-piece-con'>" +
-            "<img src='' alt='' id='SMCaptcha-piece-img'>" +
-            "</div>" +
-            "<div class='SMCaptcha-loading-box'>" +
-            "<div class='SMCaptcha-loading-icon' id='SMCaptcha-loading-icon'>" +
-            this.svgs.loading +
-            "</div>" +
-            "<div class='SMCaptcha-loading-text' id='SMCaptcha-loading-text'>加载中...</div>" +
-            "</div>" +
-            "<div class='SMCaptcha-refresh' id='SMCaptcha-refresh'>" +
-            "</div>" +
-            "</div>" +
-            "<div class='SMCaptcha-slider-wrapper' id='SMCaptcha-slider-block'>" +
-            "<div class='SMCaptcha-slider-process' id='SMCaptcha-slider-process'></div>" +
-            "<div class='SMCaptcha-slider' id='SMCaptcha-slider'>" +
-            "<div class='SMCaptcha-slider-icon' id='SMCaptcha-slider-icon'>" +
-                this.svgs.right+
-            "</div>" +
-            "</div>" +
-            "<div class='SMCaptcha-slider-text' id='SMCaptcha-slider-text'>" +
-            "</div>" +
-            "</div>" +
-            "</div>";
+        let htmlText = "<div class='SMCaptcha-captcha-wrapper ' id='SMCaptcha-captcha-root'><div class='SMCaptcha-img-wrapper' id='SMCaptcha-img-con'><div class='SMCaptcha-bg-wrapper' id='SMCaptcha-bg-con'></div><div class='SMCaptcha-piece-wrapper' id='SMCaptcha-piece-con'><img src='' alt='' id='SMCaptcha-piece-img'></div><div class='SMCaptcha-loading-box'><div class='SMCaptcha-loading-icon' id='SMCaptcha-loading-icon'>"+this.svgs.loading + "</div><div class='SMCaptcha-loading-text' id='SMCaptcha-loading-text'>加载中...</div></div><div class='SMCaptcha-refresh' id='SMCaptcha-refresh'></div></div><div class='SMCaptcha-margin-box' id='SMCaptcha-margin-box'></div><div class='SMCaptcha-slider-wrapper' id='SMCaptcha-slider-block'><div class='SMCaptcha-slider-process' id='SMCaptcha-slider-process'></div><div class='SMCaptcha-slider' id='SMCaptcha-slider'><div class='SMCaptcha-slider-icon' id='SMCaptcha-slider-icon'>" + this.svgs.right+ "</div></div><div class='SMCaptcha-slider-text' id='SMCaptcha-slider-text'></div></div></div>";
         let rootDom = document.getElementById(root);
         rootDom.innerHTML = htmlText;
     }
@@ -109,10 +83,12 @@ export default class Captcha{
      * @param container
      */
     loadImage(url,id,container,callback){
+        let self =this;
         let img = document.getElementById(id)?document.getElementById(id):document.createElement('img');
         img.id = id;
         img.src = url+'?t='+(parseInt(Math.random() * 10000) + (new Date()).valueOf());
         img.onerror = function () {
+            self.loadFail();
             callback(true);
         };
         img.onload = function () {
@@ -224,7 +200,7 @@ export default class Captcha{
      * 显示验证码区域
      */
     setDefaultView(type){
-        let {Piece,ImgCon,SliderBlock,Slider} = this.elements;
+        let {Piece,ImgCon,SliderBlock,Slider,SMCaptchaMarginBox} = this.elements;
         let ratio = this.ratios[type||'default'];
         let sum = ratio.reduce(function (a,b) {
             return a+b;
@@ -236,14 +212,16 @@ export default class Captcha{
             CaptchaWrapper.style.height = Width/2;
             Height = Width/2;
         }
+
         let ImgHeight = (ratio[0]/sum)*Height;
         let MarginHeight = (ratio[1]/sum)*Height;
         let SliderHeight = (ratio[2]/sum)*Height;
+
         ImgCon.style.height = ImgHeight +"px";
-        ImgCon.style.marginBottom = MarginHeight-2+'px';
-        SliderBlock.style.height = SliderHeight+'px';
-        Slider.style.width = Slider.style.height = SliderHeight+'px';
         Piece.style.height = ImgHeight +"px";
+        SMCaptchaMarginBox.style.height = MarginHeight+'px';
+        SliderBlock.style.height = SliderHeight+'px';
+        Slider.style.width = Slider.style.height = SliderHeight-2+'px';
     }
 
 

@@ -84,17 +84,12 @@ class SMCaptcha {
         new _Object(config)._each((key,value)=>{
             this._config[key] = value;
         });
-        this.checkConfigParams(this._config)
+        this.checkConfigParams(this._config);
         let {domains,css,protocol,appendTo} = this._config;
         this.defaultKey = 'sshummei';
         this._result = null;
         this.captchaData = null;
         this.retry = 0;
-        this._smApi = {
-            domain:'123.206.13.134',
-            register:'/ca/v1/register',
-            check:'/ca/v1/fverify'
-        };
         load({
             domains,
             path:css,

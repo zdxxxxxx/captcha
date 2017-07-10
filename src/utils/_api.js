@@ -2,13 +2,15 @@ import JsonP from './_load.js'
 import {throwError} from './_error.js'
 import {isFunction} from './_functions.js'
 import {DES,base64Decode,base64Encode} from './_des.js'
+import {SM_API} from './_config.js'
+
 /**
  * 注册验证码
  * @param conf
  */
 export function register() {
     let {protocol,organization,appId,customData} = this._config;
-    let {domain,register} = this._smApi;
+    let {domain,register} = SM_API;
     let cp = this.cp;
     let conf = {
         domains:[domain],
@@ -60,7 +62,7 @@ export function check(postData) {
     let {act} = postData;
     let {protocol,organization,appId} = this._config;
     let {rid,k,l} = this.captchaData;
-    let {domain,check} = this._smApi;
+    let {domain,check} = SM_API;
     let key = DES(this.defaultKey,base64Decode(k),0,0);
     key = key.substr(0,l);
     let postAct = DES(key,JSON.stringify(act),1,0);

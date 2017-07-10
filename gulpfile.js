@@ -93,7 +93,7 @@ gulp.task("browserify-b", function () {
     }))
         .bundle()
         .on('error', swallowError)
-        .pipe(source(`sdk.min.js`))
+        .pipe(source(`captcha-sdk.min.js`))
         .pipe(buffer())
         .pipe(uglify())
         .pipe(gulp.dest(`dist/`));

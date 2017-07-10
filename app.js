@@ -18,11 +18,11 @@ app.get('/getResource', function (req, res) {
     var data = {
         code: 1100,
         detail: {
-            js: '/dist/sdk.min.js',
+            js: '/dist/captcha-sdk.min.js',
             css:'/dist/style.min.css',
             domains: domains
         }
-    }
+    };
     res.send(callback + "(" + JSON.stringify(data) + ")")
 });
 
