@@ -22,9 +22,9 @@ function checkConfigParams(params){
  */
 class Config {
     constructor(conf) {
-        this.sm_apiServer = [SM_API.domain];
+        this.sm_apiServer = [SM_API.domain];//118.89.223.233
         this.protocol = 'https://';
-        this.path = SM_API.conf;
+        this.path = SM_API.conf;// /getResource
         this._extend(conf);
     }
     _extend(obj) {
