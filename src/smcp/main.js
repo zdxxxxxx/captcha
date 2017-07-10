@@ -70,36 +70,40 @@ let initSMCaptcha = function (customConfig, callback) {
         if(!status){
             throwError('NETWORK_ERROR',customConfig,{message:'conf api error'})
         } else {
-            let detail = newConfig.detail;
-            let {
-                js,
-                domains,
-                css
-            } = detail;
-            let init = function () {
-                config._extend({
-                    css,
-                    domains
+            let {code,detail} = newConfig;
+            if(code!==1100){
+                throwError('SERVER_ERROR',customConfig,{message:'conf api error'})
+            }else{
+                let {
+                    js,
+                    domains,
+                    css
+                } = detail;
+                let init = function () {
+                    config._extend({
+                        css,
+                        domains
+                    });
+                    callback(new window.SMCaptcha(config));
+                };
+                let jpSdk = new Load({
+                    domains: domains,
+                    path: js,
+                    protocol: protocol,
+                    query: {
+                        t:parseInt(Math.random() * 10000) + (new Date()).valueOf()
+                    },
+                    timeout
                 });
-                callback(new window.SMCaptcha(config));
-            };
-            let jpSdk = new Load({
-                domains: domains,
-                path: js,
-                protocol: protocol,
-                query: {
-                    t:parseInt(Math.random() * 10000) + (new Date()).valueOf()
-                },
-                timeout
-            });
 
-            jpSdk.load((err) => {
-                if (err) {
-                    throwError('NETWORK_ERROR',customConfig,{message:'js-sdk load fail'})
-                } else {
-                    init()
-                }
-            })
+                jpSdk.load((err) => {
+                    if (err) {
+                        throwError('NETWORK_ERROR',customConfig,{message:'js-sdk load fail'})
+                    } else {
+                        init()
+                    }
+                })
+            }
         }
     })
 };
