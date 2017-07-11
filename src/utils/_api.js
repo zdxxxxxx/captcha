@@ -1,9 +1,30 @@
-import JsonP from './_load.js'
+import Load from './_load.js'
 import {throwError} from './_error.js'
-import {isFunction} from './_functions.js'
+import {isFunction,isNumber,isObject,isString} from './_functions.js'
 import {DES,base64Decode,base64Encode} from './_des.js'
 import {SM_API} from './_config.js'
 
+
+function checkServerParams(data) {
+    let {bg_width,bg_height,bg,fg,domains,rid,k,l} = data;
+    let err = {
+        status:false,
+        type:''
+    };
+    if(!isNumber(bg_height)||!isNumber(bg_width)||!isString(bg)||!isString(fg)||!isString(rid)||!isString(k)||!isNumber(l)){
+        setError()
+    }
+    if(!isObject(domains)||!domains.length||domains.length<1){
+        setError()
+    }
+    function setError() {
+        err = {
+            status:true,
+            type:'SERVER_ERROR'
+        }
+    }
+    return err
+}
 /**
  * 注册验证码
  * @param conf
@@ -12,38 +33,41 @@ export function register() {
     let {protocol,organization,appId,customData} = this._config;
     let {domain,register} = SM_API;
     let cp = this.cp;
-    let conf = {
-        domains:[domain],
-        path:register,
-        protocol:protocol,
-        query:{
-            organization:organization,
-            appId:appId,
-            data:JSON.stringify(customData),
-        }
+    let query = {
+        organization:organization,
+        appId:appId,
+        data:JSON.stringify(customData)
     };
     cp.loading();
-    let jsp = new JsonP(conf);
-    jsp.jsonp((status,data)=>{
-        if(!status){
+    let jsp = new Load();
+    jsp.jsonp(domain,register,protocol,query,(error,data)=>{
+        let {status,type} =error;
+        if(status){
             cp.loadFail();
-            throwError('NETWORK_ERROR',this._config,{message:'register api error'});
+            throwError(type,this._config,{message:'register api error'});
         }else{
             let {code,detail} = data;
             if(code === 1100){
-                let {bg_width,bg_height,bg,fg,domains,rid,k,l} = detail;
-                this.captchaData = {
-                    rid:rid,
-                    k:k,
-                    l:l
-                };
-                cp.init({
-                    width:bg_width,
-                    height:bg_height,
-                    bg,
-                    fg,
-                    domains
-                });
+                let err = checkServerParams(detail);
+                let {status,type} =err;
+                if(status){
+                    cp.loadFail();
+                    throwError(type,this._config,{message:"register api params err"});
+                }else{
+                    let {bg_width,bg_height,bg,fg,domains,rid,k,l} = detail;
+                    this.captchaData = {
+                        rid:rid,
+                        k:k,
+                        l:l
+                    };
+                    cp.init({
+                        width:bg_width,
+                        height:bg_height,
+                        bg,
+                        fg,
+                        domains
+                    });
+                }
             }else{
                 cp.loadFail();
                 throwError('SERVER_ERROR',this._config,{message:"register api fail"});
@@ -67,25 +91,20 @@ export function check(postData) {
     key = key.substr(0,l);
     let postAct = DES(key,JSON.stringify(act),1,0);
     postAct = base64Encode(postAct);
-    let conf = {
-        domains:[domain],
-        path:check,
-        protocol:protocol,
-        query:{
-            organization:organization,
-            appId:appId,
-            act:postAct,
-            rid,
-        }
+    let query = {
+        organization:organization,
+        appId:appId,
+        act:postAct,
+        rid,
     };
-    let jsp = new JsonP(conf);
-    jsp.jsonp((status,data)=>{
-        if(!status){
+    let jsp = new Load();
+    jsp.jsonp(domain,check,protocol,query,(error,data)=>{
+        let {status,type} =error;
+        if(status){
             this.cp.loadFail();
-            throwError('NETWORK_ERROR',this._config,data,'fv api error');
+            throwError(type,this._config,data,'fv api error');
         }else{
             let {code,riskLevel} = data;
-            this.retry++;
             if(!code||code!==1100){
                 throwError('SERVER_ERROR',this._config,'fv api failed');
                 return ;
@@ -95,21 +114,13 @@ export function check(postData) {
                 rid:rid,
                 pass:pass
             };
+            if(isFunction(this._config['onSuccess'])){
+                this._config['onSuccess']();
+            }
             if(pass){
-                if(isFunction(this._config['onSuccess'])){
-                    this._config['onSuccess']();
-                }
                 this.cp.success()
             }else{
-                let {maxRetry} = this._config;
-                if(this.retry>=maxRetry){
-                    if(isFunction(this._config['onSuccess'])){
-                        this._config['onSuccess']();
-                    }
-                    this.cp.fail(true);
-                }else{
-                    this.cp.fail();
-                }
+                this.cp.fail();
             }
         }
     })

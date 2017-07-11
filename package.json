@@ -7,7 +7,8 @@
     "watch-smcp": "gulp watch --entry smcp",
     "watch-sdk": "gulp watch --entry sdk",
     "watch": "gulp watch",
-    "build":"gulp build"
+    "build":"gulp build",
+    "build-dev":"gulp build-dev"
   },
   "author": "zdxxxxxx",
   "license": "ISC",

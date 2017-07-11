@@ -31,8 +31,8 @@ app.get('/getResourceDev', function (req, res) {
     var data = {
         code: 1100,
         detail: {
-            js: '/build/sdk/sdk.js',
-            css:'/build/style/style.css',
+            js: '/build/captcha-sdk.min.js',
+            css:'/build/style.min.css',
             domains: domains
         }
     }

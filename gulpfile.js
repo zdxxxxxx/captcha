@@ -99,6 +99,45 @@ gulp.task("browserify-b", function () {
         .pipe(gulp.dest(`dist/`));
 });
 
+//dist相关
+gulp.task('build-css-dev', function() {
+    return gulp.src('src/style/style.css')
+        .pipe(minifyCSS())
+        .pipe(rename(`style.min.css`))
+        .pipe(gulp.dest('build/')); //最后生成出来
+});
+// smcp.min.js
+gulp.task("browserify-a-dev", function () {
+    var b = browserify({
+        entries: `src/smcp/main.js`
+    });
+    return b.transform(babel.configure({
+        presets: ['es2015']
+    }))
+        .bundle()
+        .on('error', swallowError)
+        .pipe(source(`smcp.min.js`))
+        .pipe(buffer())
+        .pipe(uglify())
+        .pipe(gulp.dest(`build/`));
+});
 
+
+// sdk
+gulp.task("browserify-b-dev", function () {
+    var b = browserify({
+        entries: `src/sdk/main.js`
+    });
+    return b.transform(babel.configure({
+        presets: ['es2015']
+    }))
+        .bundle()
+        .on('error', swallowError)
+        .pipe(source(`captcha-sdk.min.js`))
+        .pipe(buffer())
+        .pipe(uglify())
+        .pipe(gulp.dest(`build/`));
+});
 gulp.task('build',['browserify-a','browserify-b','build-css']);
+gulp.task('build-dev',['browserify-a-dev','browserify-b-dev','build-css-dev']);
 

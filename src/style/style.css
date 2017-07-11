@@ -14,7 +14,6 @@
       border-radius: 2px;
       border: 1px solid #e4e7eb;
       background-color: #f7f9fa;
-      overflow: hidden;
       box-sizing: border-box;
   }
   .SMCaptcha-captcha-wrapper .SMCaptcha-margin-box{
@@ -170,6 +169,14 @@
       background: #fcdbd9;
   }
 
+  .SMCaptcha-refresh{
+      position: absolute;
+      height: 32px;
+      width: 32px;
+      top:1px;
+      right: 1px;
+      z-index: 3;
+  }
   @keyframes SMCaptcha-captcha-loading-animate {
       0% {
           -webkit-transform: rotate(0deg);

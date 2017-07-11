@@ -6,7 +6,7 @@
 export const errors = {
     NETWORK_ERROR:{
         code:2001,
-        message:"网络异常"
+        message:"资源异常"
     },
     SERVER_ERROR:{
         code:2002,
@@ -15,6 +15,10 @@ export const errors = {
     PARAMS_ERROR:{
         code:2003,
         message:"参数异常"
+    },
+    NET_TIMEOUT:{
+        code:2005,
+        message:'网络超时'
     }
 };
 

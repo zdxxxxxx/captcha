@@ -1,30 +1,65 @@
-import Load from '../utils/_load.js'
+import Load from '../utils/_load.js';
 import {throwError} from '../utils/_error.js';
-import {isString} from '../utils/_functions.js';
-import _Object from '../utils/_object.js'
-import {SM_API} from '../utils/_config.js'
+import {isString,isNumber,isBoolean,isObject,isFunction} from '../utils/_functions.js';
+import _Object from '../utils/_object.js';
+import {SM_API} from '../utils/_config.js';
+
 /**
  *  参数校验
  */
 function checkConfigParams(params){
-    let {organization,appId} = params;
-    let status = false;
-    if(organization==''||!isString(organization)){
-        status = true
+    let {organization,appId,appendTo} = params;
+    let error = {status:false,message:''};
+
+    if(organization===''||!isString(organization)){
+        error.status = true;
+        error.message = 'organization is mistake'
     }
-    if(appId==''||!isString(appId)){
-        status = true
+    if(appId===''||!isString(appId)){
+        error.status = true;
+        error.message = 'appId is mistake'
     }
-    return status;
+    if(!appendTo||!isString(appendTo)||!document.getElementById(appendTo)){
+        error.status = true;
+        error.message = 'appendTo is mistake'
+    }
+    return error;
+}
+
+/**
+ * 非必填参数校正
+ */
+function fixParams(conf) {
+    let {timeout,https,customData,onError,version} = conf;
+    let obj = {};
+    new _Object(conf)._each((key, value) => {
+        obj[key] = value;
+    });
+    if(!timeout||!isNumber(timeout)){
+        obj.timeout = 30000;
+    }
+    if(!https||!isBoolean(https)){
+        obj.https = false
+    }
+    if(!isObject(customData)){
+        obj.customData = undefined;
+    }
+    if(!isFunction(onError)){
+        obj.onError = undefined
+    }
+    if(!isString(version)){
+        obj.version = undefined
+    }
+    return obj;
 }
 /**
  * 服务器获取资源路径
  */
 class Config {
     constructor(conf) {
-        this.sm_apiServer = [SM_API.domain];//118.89.223.233
-        this.protocol = 'https://';
-        this.path = SM_API.conf;// /getResource
+        this.smConfApi = ['118.89.223.233'];//.concat(SM_API.domain);//118.89.223.233,SM_API.domain
+        this.protocol = window.location.protocol + '//';
+        this.sourcePath = '/getResourceDev'||SM_API.conf;// /getResource
         this._extend(conf);
     }
     _extend(obj) {
@@ -36,18 +71,19 @@ class Config {
 
 //初始化验证码
 let initSMCaptcha = function (customConfig, callback) {
+    customConfig = fixParams(customConfig);
     let config = new Config(customConfig);
-    if(checkConfigParams(customConfig)){
-        throwError('PARAMS_ERROR',customConfig,{message:'org or appid error'})
+    let error = checkConfigParams(config);
+    if(error.status){
+        throwError('PARAMS_ERROR',config,{message:error.message});
+        return;
     }
-    if (!customConfig.https) {
-        config.protocol = window.location.protocol + '//';
-    }else{
+    if (config.https) {
         config.protocol = 'https://'
     }
     let {
-        sm_apiServer,
-        path,
+        smConfApi,
+        sourcePath,
         protocol,
         organization,
         appId,
@@ -55,30 +91,26 @@ let initSMCaptcha = function (customConfig, callback) {
         timeout
     } = config;
 
-    let jp = new Load({
-        domains: sm_apiServer,
-        path,
-        protocol,
-        timeout,
-        query: {
-            organization,
-            appId,
-            rversion:version
-        }
-    });
-    jp.jsonp((status,newConfig) => {
-        if(!status){
-            throwError('NETWORK_ERROR',customConfig,{message:'conf api error'})
+    let jp = new Load();
+    jp.jsonp(smConfApi,sourcePath,protocol,{organization, appId, rversion:version},(err,newConfig) => {
+        let {status,type} = err;
+        if(status){
+            throwError(type,config,{message:'conf api error'});
+            return ;
         } else {
             let {code,detail} = newConfig;
-            if(code!==1100){
-                throwError('SERVER_ERROR',customConfig,{message:'conf api error'})
+            if(!code||code!==1100){
+                throwError('SERVER_ERROR',config,{message:'conf api error'})
             }else{
                 let {
                     js,
                     domains,
                     css
                 } = detail;
+                if(!isString(js)||!isString(css)||!isObject(domains)||!domains.length||domains.length<1){
+                    throwError('SERVER_ERROR',config,{message:'conf api params error'});
+                    return;
+                }
                 let init = function () {
                     config._extend({
                         css,
@@ -86,19 +118,11 @@ let initSMCaptcha = function (customConfig, callback) {
                     });
                     callback(new window.SMCaptcha(config));
                 };
-                let jpSdk = new Load({
-                    domains: domains,
-                    path: js,
-                    protocol: protocol,
-                    query: {
-                        t:parseInt(Math.random() * 10000) + (new Date()).valueOf()
-                    },
-                    timeout
-                });
-
-                jpSdk.load((err) => {
-                    if (err) {
-                        throwError('NETWORK_ERROR',customConfig,{message:'js-sdk load fail'})
+                let jpSdk = new Load(timeout);
+                jpSdk.load('Script',domains,js,protocol,{t:parseInt(Math.random() * 10000) + (new Date()).valueOf()},(err) => {
+                    let {status,type} = err;
+                    if (status) {
+                        throwError(type,config,{message:'js-sdk load fail'})
                     } else {
                         init()
                     }
