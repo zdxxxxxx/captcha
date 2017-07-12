@@ -37,7 +37,7 @@ export default class Load {
             let i = document.styleSheets.length;
             for(let k=0;k<i;k++){
                 if(document.styleSheets[k].href.indexOf(url)>-1){
-                    cb(false)
+                    cb(error);
                 }
             }
         },1000);
