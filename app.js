@@ -22,7 +22,7 @@ app.get('/getResource', function (req, res) {
             domains: domains
         }
     };
-    res.send(callback + "(" + JSON.stringify(data) + ")")
+        res.send(callback + "(" + JSON.stringify(data) + ")")
 });
 
 app.get('/getResourceDev', function (req, res) {
