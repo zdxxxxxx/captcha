@@ -23,8 +23,8 @@ export default class Captcha{
         };
         this.timer = null;
         this.locked = true;
+        this.IsPC = IsPC();
         this.method = !IsPC()?['touchstart','touchmove','touchend','touchstart']:['mousedown','mousemove','mouseup','onclick'];
-
         this.svgs = {
             fail:'<svg class="SMCaptcha-icon-svg" viewBox="0 0 1024 1024" version="1.1" xmlns="http://www.w3.org/2000/svg" p-id="4350" xmlns:xlink="http://www.w3.org/1999/xlink" ><path d="M557.312 513.248l265.28-263.904c12.544-12.48 12.608-32.704 0.128-45.248-12.512-12.576-32.704-12.608-45.248-0.128L512.128 467.904l-263.04-263.84c-12.448-12.48-32.704-12.544-45.248-0.064-12.512 12.48-12.544 32.736-0.064 45.28l262.976 263.776L201.6 776.8c-12.544 12.48-12.608 32.704-0.128 45.248a31.937 31.937 0 0 0 22.688 9.44c8.16 0 16.32-3.104 22.56-9.312l265.216-263.808 265.44 266.24c6.24 6.272 14.432 9.408 22.656 9.408a31.94 31.94 0 0 0 22.592-9.344c12.512-12.48 12.544-32.704 0.064-45.248L557.312 513.248z" fill="#ffffff" p-id="4351"></path></svg>',
             loading:'<svg style="width: 100%;height: 100%" viewBox="0 0 1024 1024" version="1.1" xmlns="http://www.w3.org/2000/svg" p-id="3132" xmlns:xlink="http://www.w3.org/1999/xlink"><path d="M512.511489 21.482517C241.348075 21.482517 21.482517 241.343255 21.482517 512.511489 21.482517 783.684341 241.338636 1003.54046 512.511489 1003.54046 539.065295 1003.54046 560.591409 982.014346 560.591409 955.460539 560.591409 928.906733 539.065295 907.380619 512.511489 907.380619 294.446249 907.380619 117.642358 730.576728 117.642358 512.511489 117.642358 294.45134 294.455216 117.642358 512.511489 117.642358 730.576728 117.642358 907.380619 294.446249 907.380619 512.511489 907.380619 539.065295 928.906733 560.591409 955.460539 560.591409 982.014346 560.591409 1003.54046 539.065295 1003.54046 512.511489 1003.54046 241.338636 783.684341 21.482517 512.511489 21.482517Z" p-id="3133"></path></svg>',
@@ -55,7 +55,11 @@ export default class Captcha{
         };
 
         this.setDefaultView();
-        this.bindEvent();
+        if(!IsPC()){
+            this.bindMobileEvent();
+        }else{
+
+        }
     }
 
     /**
@@ -270,7 +274,7 @@ export default class Captcha{
     /**
      * 绑定事件
      */
-    bindEvent(){
+    bindMobileEvent(){
         let self = this;
         let {CaptchaWrapper,Piece,Slider,SliderIcon,SliderProcess,refreshBtn} = this.elements;
         let {SMCaptcha} = this._config;

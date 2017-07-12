@@ -128,7 +128,10 @@
       display: block;
   }
   .SMCaptcha-captcha-wrapper.SMCaptcha-load-fail .SMCaptcha-img-wrapper .SMCaptcha-loading-box .SMCaptcha-loading-icon{
-      animation: none;
+      -webkit-animation:none;
+      -o-animation:none;
+      -moz-animation:none;
+      animation:none;
   }
   .SMCaptcha-captcha-wrapper .SMCaptcha-img-wrapper .SMCaptcha-loading-box{
       position: absolute;
