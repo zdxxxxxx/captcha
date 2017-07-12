@@ -1,10 +1,9 @@
 //工具
-import {makeURL,isString,isNumber} from '../utils/_functions.js'
-import _Object from '../utils/_object.js'
-import {register} from '../utils/_api.js'
-import Captcha from '../utils/_captcha.js'
-import {throwError} from '../utils/_error.js'
-import Load from '../utils/_load.js'
+import _Object from '../pkg/_object.js'
+import {register} from '../pkg/_api.js'
+import Captcha from '../pkg/_captcha.js'
+import {throwError} from '../pkg/_error.js'
+import Load from '../pkg/_load.js'
 
 /**
  * sdk

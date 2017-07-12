@@ -1,8 +1,8 @@
-import Load from '../utils/_load.js';
-import {throwError} from '../utils/_error.js';
-import {isString,isNumber,isBoolean,isObject,isFunction} from '../utils/_functions.js';
-import _Object from '../utils/_object.js';
-import {SM_API} from '../utils/_config.js';
+import Load from '../pkg/_load.js';
+import {throwError} from '../pkg/_error.js';
+import {isString,isNumber,isBoolean,isObject,isFunction} from '../pkg/_functions.js';
+import _Object from '../pkg/_object.js';
+import {SM_API} from '../pkg/_config.js';
 
 /**
  *  参数校验
@@ -59,7 +59,7 @@ class Config {
     constructor(conf) {
         this.smConfApi = ['118.89.223.233'];//.concat(SM_API.domain);//118.89.223.233,SM_API.domain
         this.protocol = window.location.protocol + '//';
-        this.sourcePath = '/getResource'||SM_API.conf;// /getResource
+        this.sourcePath = '/getResourceDev'||SM_API.conf;// /getResource
         this._extend(conf);
     }
     _extend(obj) {
