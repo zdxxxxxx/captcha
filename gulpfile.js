@@ -15,10 +15,7 @@ function swallowError(error) {
 
 
 
-// 监视文件变化，自动执行任务
-gulp.task('watch', function () {
-    gulp.watch('src/**/*.*',['build-dev']);
-});
+
 
 
 
@@ -47,7 +44,7 @@ gulp.task("browserify-a", function () {
 });
 
 
-// sdk
+// sdk.min.js
 gulp.task("browserify-b", function () {
     var b = browserify({
         entries: `src/sdk/main.js`
@@ -104,6 +101,11 @@ gulp.task("browserify-b-dev", function () {
         .pipe(buffer())
         .pipe(uglify())
         .pipe(gulp.dest(`dev/`));
+});
+
+// 监视文件变化，自动执行任务
+gulp.task('watch', function () {
+    gulp.watch('src/**/*.*',['build-dev']);
 });
 gulp.task('build',['browserify-a','browserify-b','build-css']);
 gulp.task('build-dev',['browserify-a-dev','browserify-b-dev','build-css-dev']);
