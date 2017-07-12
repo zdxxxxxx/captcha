@@ -57,9 +57,9 @@ function fixParams(conf) {
  */
 class Config {
     constructor(conf) {
-        this.smConfApi = ['118.89.223.233'];//.concat(SM_API.domain);//118.89.223.233,SM_API.domain
+        this.smConfApi = SM_API.domain;//.concat(SM_API.domain);//118.89.223.233,SM_API.domain
         this.protocol = window.location.protocol + '//';
-        this.sourcePath = '/getResource'||SM_API.conf;// /getResource
+        this.sourcePath = SM_API.conf;// /getResource
         this._extend(conf);
     }
     _extend(obj) {

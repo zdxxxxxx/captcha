@@ -5,7 +5,7 @@
   "main": "index.js",
   "scripts": {
     "watch": "gulp watch",
-    "build-qa":"gulp build",
+    "build-qa":"gulp build-qa",
     "build-dev":"gulp build-dev",
     "build":"gulp build"
   },

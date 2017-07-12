@@ -3,7 +3,6 @@ import {check} from './_api.js'
 import {IsPC,isFunction} from './_functions.js'
 import _Object from './_object.js'
 import {throwError} from './_error.js'
-import Load from './_load.js'
 export default class Captcha{
     constructor({rootDom,SMCaptcha,protocol}){
         this._config={
