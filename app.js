@@ -1,10 +1,9 @@
 var express = require('express');
 var app = express();
-app.use('/build', express.static('build'));
 
 
 app.get('/', function (req, res) {
-    res.sendfile('index.html');
+    res.sendfile('mobile.html');
 });
 app.get('/test', function (req, res) {
     res.sendfile('test.html');
@@ -18,8 +17,8 @@ app.get('/getResource', function (req, res) {
     var data = {
         code: 1100,
         detail: {
-            js: '/dist/captcha-sdk.min.js',
-            css:'/dist/style.min.css',
+            js: '/qa/captcha-sdk.min.js',
+            css:'/qa/style.min.css',
             domains: domains
         }
     };
@@ -31,42 +30,14 @@ app.get('/getResourceDev', function (req, res) {
     var data = {
         code: 1100,
         detail: {
-            js: '/build/captcha-sdk.min.js',
-            css:'/build/style.min.css',
+            js: '/dev/captcha-sdk.min.js',
+            css:'/dev/style.min.css',
             domains: domains
         }
     }
     res.send(callback + "(" + JSON.stringify(data) + ")")
 });
-app.get('/register', function (req, res) {
-    var callback = req.query.callback;
-    var data = {
-        code: 1100,
-        detail: {
-            rid:'rid_'+ (parseInt(Math.random() * 10000) + (new Date()).valueOf()),
-            bg:'/build/img/WechatIMG1.jpeg',
-            fg:'/build/img/WechatIMG2.jpeg',
-            domains: domains,
-            bg_width:320,
-            bg_height:120,
-            k:'1234567',
-            l:12
-        }
-    }
-    res.send(callback + "(" + JSON.stringify(data) + ")")
-});
 
-app.get('/check', function (req, res) {
-    var callback = req.query.callback;
-    var data = {
-        code: 1100,
-        detail: {
-            success:true,
-            message:''
-        }
-    };
-    res.send(callback + "(" + JSON.stringify(data) + ")")
-});
 
 var server = app.listen(3000, function () {
     var host = '127.0.0.1';

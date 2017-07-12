@@ -24,7 +24,7 @@
 <body>
     <div id="captcha" class="captcha-container"></div>
 </body>
-<script src="dist/smcp.min.js"></script>
+<script src="qa/smcp.min.js"></script>
 <script>
     window.onload = function () {
         if(window.initSMCaptcha === undefined||typeof window.initSMCaptcha !=='function'){
@@ -37,8 +37,6 @@
             err = encodeURIComponent(JSON.stringify(err));
             document.location = 'shumei://onresult?data='+err;
         }else{
-            init();
-
 //            initSMCaptcha({
 //                organization: 'IkzxwQ4vofwwvFqC8ir2', //公司标识
 //                appId: '123', //渠道
@@ -48,33 +46,31 @@
 //                onError:function (err,detail) {
 //                    err.method = 'onError';
 //                    err.detail = detail;
-//                    console.log(2,err);
 //                    err = encodeURIComponent(JSON.stringify(err));
-//                    //document.location = 'shumei://onresult?data='+err;
+//                    document.location = 'shumei://onresult?data='+err;
 //                }
 //            }, function (SMCaptcha) {
 //                SMCaptcha.onSuccess(function(){
 //                    var result = SMCaptcha.getResult();
 //                    result.method="onSuccess";
-//                    console.log(result);
 //                    result = encodeURIComponent(JSON.stringify(result));
-//                    //document.location = 'shumei://onresult?data='+result;
+//                    document.location = 'shumei://onresult?data='+result;
 //                });
 //                SMCaptcha.onError(function (err,detail) {
 //                    err.method = 'onError';
 //                    err.detail = detail;
-//                    console.log(3,err);
 //                    err = encodeURIComponent(JSON.stringify(err));
-//                    //document.location = 'shumei://onresult?data='+err;
+//                    document.location = 'shumei://onresult?data='+err;
 //                });
 //                SMCaptcha.onReady(function () {
 //                    var result = {
 //                        method:'onReady'
 //                    };
 //                    result = encodeURIComponent(JSON.stringify(result));
-//                    //document.location = 'shumei://onresult?data='+result;
+//                    document.location = 'shumei://onresult?data='+result;
 //                })
 //            });
+            init();
         }
     };
 

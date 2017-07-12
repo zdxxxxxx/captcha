@@ -4,11 +4,10 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "watch-smcp": "gulp watch --entry smcp",
-    "watch-sdk": "gulp watch --entry sdk",
     "watch": "gulp watch",
-    "build":"gulp build",
-    "build-dev":"gulp build-dev"
+    "build-qa":"gulp build",
+    "build-dev":"gulp build-dev",
+    "build":"gulp build"
   },
   "author": "zdxxxxxx",
   "license": "ISC",

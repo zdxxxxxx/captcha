@@ -13,58 +13,22 @@ function swallowError(error) {
     this.emit('end')
 }
 
-//watch相关
 
-
-gulp.task('css', function() {
-    return gulp.src('src/style/style.css')
-        .pipe(gulp.dest('build/style'));
-});
 
 // 监视文件变化，自动执行任务
-gulp.task('watchJS', function () {
-    gulp.watch('src/**/*.*',['browserify-c','browserify-d','css']);
+gulp.task('watch', function () {
+    gulp.watch('src/**/*.*',['build-dev']);
 });
 
-// smcp watch
-gulp.task("browserify-c", function () {
-    var b = browserify({
-        entries: `src/smcp/main.js`
-    });
-    return b.transform(babel.configure({
-            presets: ['es2015']
-        }))
-        .bundle()
-        .on('error', swallowError)
-        .pipe(source(`smcp.js`))
-        .pipe(gulp.dest(`build/smcp/`));
-});
-
-// sdk watch
-gulp.task("browserify-d", function () {
-    var b = browserify({
-        entries: `src/sdk/main.js`
-    });
-    return b.transform(babel.configure({
-        presets: ['es2015']
-    }))
-        .bundle()
-        .on('error', swallowError)
-        .pipe(source(`sdk.js`))
-        .pipe(gulp.dest(`build/sdk/`));
-});
-
-gulp.task('watch', ['browserify-c', 'browserify-d','css','watchJS']);
 
 
-
-
-//dist相关
+//qa相关
+//style.min.js
 gulp.task('build-css', function() {
     return gulp.src('src/style/style.css')
         .pipe(minifyCSS())
         .pipe(rename(`style.min.css`))
-        .pipe(gulp.dest('dist/')); //最后生成出来
+        .pipe(gulp.dest('qa/')); //最后生成出来
 });
 // smcp.min.js
 gulp.task("browserify-a", function () {
@@ -79,7 +43,7 @@ gulp.task("browserify-a", function () {
         .pipe(source(`smcp.min.js`))
         .pipe(buffer())
         .pipe(uglify())
-        .pipe(gulp.dest(`dist/`));
+        .pipe(gulp.dest(`qa/`));
 });
 
 
@@ -96,15 +60,18 @@ gulp.task("browserify-b", function () {
         .pipe(source(`captcha-sdk.min.js`))
         .pipe(buffer())
         .pipe(uglify())
-        .pipe(gulp.dest(`dist/`));
+        .pipe(gulp.dest(`qa/`));
 });
 
-//dist相关
+
+
+//dev
+//style.min.js
 gulp.task('build-css-dev', function() {
     return gulp.src('src/style/style.css')
         .pipe(minifyCSS())
         .pipe(rename(`style.min.css`))
-        .pipe(gulp.dest('build/')); //最后生成出来
+        .pipe(gulp.dest('dev/')); //最后生成出来
 });
 // smcp.min.js
 gulp.task("browserify-a-dev", function () {
@@ -119,11 +86,11 @@ gulp.task("browserify-a-dev", function () {
         .pipe(source(`smcp.min.js`))
         .pipe(buffer())
         .pipe(uglify())
-        .pipe(gulp.dest(`build/`));
+        .pipe(gulp.dest(`dev/`));
 });
 
 
-// sdk
+// sdk.min.js
 gulp.task("browserify-b-dev", function () {
     var b = browserify({
         entries: `src/sdk/main.js`
@@ -136,7 +103,7 @@ gulp.task("browserify-b-dev", function () {
         .pipe(source(`captcha-sdk.min.js`))
         .pipe(buffer())
         .pipe(uglify())
-        .pipe(gulp.dest(`build/`));
+        .pipe(gulp.dest(`dev/`));
 });
 gulp.task('build',['browserify-a','browserify-b','build-css']);
 gulp.task('build-dev',['browserify-a-dev','browserify-b-dev','build-css-dev']);
