@@ -104,9 +104,10 @@ gulp.task("browserify-b-dev", function () {
 });
 
 // 监视文件变化，自动执行任务
-gulp.task('watch', function () {
+gulp.task('watchDev', function () {
     gulp.watch('src/**/*.*',['build-dev']);
 });
+gulp.task('watch',['build-dev','watchDev']);
 gulp.task('build',['browserify-a','browserify-b','build-css']);
 gulp.task('build-dev',['browserify-a-dev','browserify-b-dev','build-css-dev']);
 
