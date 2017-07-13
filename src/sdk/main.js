@@ -4,7 +4,7 @@ import {register} from '../pkg/_api.js'
 import Captcha from '../pkg/_captcha.js'
 import {throwError} from '../pkg/_error.js'
 import Load from '../pkg/_load.js'
-
+import {isNumber} from '../pkg/_functions.js'
 /**
  * sdk
  */
@@ -14,7 +14,7 @@ class SMCaptcha {
         new _Object(config)._each((key,value)=>{
             this._config[key] = value;
         });
-        let {domains,css,protocol,appendTo} = this._config;
+        let {domains,css,protocol,appendTo,width} = this._config;
         this.defaultKey = 'sshummei';
         this._result = null;
         this.captchaData = null;
@@ -27,7 +27,8 @@ class SMCaptcha {
                 this.cp = new Captcha({
                     rootDom:appendTo,
                     SMCaptcha:this,
-                    protocol
+                    protocol,
+                    width:isNumber(width)?width:undefined
                 });
                 this.reset();
             }

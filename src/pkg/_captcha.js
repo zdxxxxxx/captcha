@@ -4,13 +4,13 @@ import {IsPC,isFunction} from './_functions.js'
 import _Object from './_object.js'
 import {throwError} from './_error.js'
 export default class Captcha{
-    constructor({rootDom,SMCaptcha,protocol}){
+    constructor({rootDom,SMCaptcha,protocol,width}){
         this._config={
             SMCaptcha:SMCaptcha,
             rootDom:rootDom,
-            protocol
+            protocol,
+            width:width||'auto'
         };
-
         this.prefix = 'SMCaptcha-';
         this.ImgStack = {
             bg:false,
@@ -22,8 +22,8 @@ export default class Captcha{
         };
         this.timer = null;
         this.locked = true;
+        this.IsPC = IsPC();
         this.method = !IsPC()?['touchstart','touchmove','touchend','touchstart']:['mousedown','mousemove','mouseup','onclick'];
-
         this.svgs = {
             fail:'<svg class="SMCaptcha-icon-svg" viewBox="0 0 1024 1024" version="1.1" xmlns="http://www.w3.org/2000/svg" p-id="4350" xmlns:xlink="http://www.w3.org/1999/xlink" ><path d="M557.312 513.248l265.28-263.904c12.544-12.48 12.608-32.704 0.128-45.248-12.512-12.576-32.704-12.608-45.248-0.128L512.128 467.904l-263.04-263.84c-12.448-12.48-32.704-12.544-45.248-0.064-12.512 12.48-12.544 32.736-0.064 45.28l262.976 263.776L201.6 776.8c-12.544 12.48-12.608 32.704-0.128 45.248a31.937 31.937 0 0 0 22.688 9.44c8.16 0 16.32-3.104 22.56-9.312l265.216-263.808 265.44 266.24c6.24 6.272 14.432 9.408 22.656 9.408a31.94 31.94 0 0 0 22.592-9.344c12.512-12.48 12.544-32.704 0.064-45.248L557.312 513.248z" fill="#ffffff" p-id="4351"></path></svg>',
             loading:'<svg style="width: 100%;height: 100%" viewBox="0 0 1024 1024" version="1.1" xmlns="http://www.w3.org/2000/svg" p-id="3132" xmlns:xlink="http://www.w3.org/1999/xlink"><path d="M512.511489 21.482517C241.348075 21.482517 21.482517 241.343255 21.482517 512.511489 21.482517 783.684341 241.338636 1003.54046 512.511489 1003.54046 539.065295 1003.54046 560.591409 982.014346 560.591409 955.460539 560.591409 928.906733 539.065295 907.380619 512.511489 907.380619 294.446249 907.380619 117.642358 730.576728 117.642358 512.511489 117.642358 294.45134 294.455216 117.642358 512.511489 117.642358 730.576728 117.642358 907.380619 294.446249 907.380619 512.511489 907.380619 539.065295 928.906733 560.591409 955.460539 560.591409 982.014346 560.591409 1003.54046 539.065295 1003.54046 512.511489 1003.54046 241.338636 783.684341 21.482517 512.511489 21.482517Z" p-id="3133"></path></svg>',
@@ -54,7 +54,13 @@ export default class Captcha{
         };
 
         this.setDefaultView();
-        this.bindEvent();
+
+
+        if(!IsPC()){
+            this.bindMobileEvent();
+        }else{
+            this.bindPcEvent();
+        }
     }
 
     /**
@@ -144,12 +150,12 @@ export default class Captcha{
      * 加载失败
      */
     loadFail(){
-        let {CaptchaWrapper,SliderText,LoadingIcon,LoadingText,SliderIcon} =this.elements;
+        let {CaptchaWrapper,SliderText,LoadingIcon,LoadingText} =this.elements;
         CaptchaWrapper.classList.add(this.prefix + 'load-fail');
         SliderText.innerText = '加载失败';
         LoadingText.innerText = '加载失败';
         LoadingIcon.innerHTML = this.svgs.loadFail;
-        SliderIcon.removeEventListener(this.method[0],this.events['moveStartHandler']);
+        this.locked = true;
     }
     /**
      *
@@ -213,22 +219,39 @@ export default class Captcha{
      * 显示验证码区域
      */
     setDefaultView(type){
+        let {width} = this._config;
         let {Piece,ImgCon,SliderBlock,Slider,SMCaptchaMarginBox,refreshBtn} = this.elements;
         let ratio = this.ratios[type||'default'];
         let sum = ratio.reduce(function (a,b) {
             return a+b;
         });
+
         let {CaptchaWrapper} = this.elements;
-        let Width = CaptchaWrapper.clientWidth;
-        let Height = CaptchaWrapper.clientHeight;
-        if(Width/Height!==2){
-            CaptchaWrapper.style.height = Width/2;
+
+        let Width = null;
+        let Height = null;
+        if(width==='auto'){
+            Width = CaptchaWrapper.clientWidth;
+            Height = CaptchaWrapper.clientHeight;
+            if(Width/Height!==2){
+                CaptchaWrapper.style.height = Width/2 +'px';
+                Height = Width/2;
+            }
+        }else{
+            Width = width;
             Height = Width/2;
+            CaptchaWrapper.style.width = Width +'px';
+            CaptchaWrapper.style.height = Width/2 +'px';
         }
 
-        let ImgHeight = (ratio[0]/sum)*Height;
-        let MarginHeight = (ratio[1]/sum)*Height;
-        let SliderHeight = (ratio[2]/sum)*Height;
+        //高度四舍五入
+        let ImgHeight = parseInt(((ratio[0]/sum)*Height).toFixed());
+        let MarginHeight = parseInt(((ratio[1]/sum)*Height).toFixed());
+        let SliderHeight = parseInt(((ratio[2]/sum)*Height).toFixed());
+
+        //修正高度加到间距里
+        MarginHeight =  MarginHeight+ (Height - (ImgHeight+MarginHeight+SliderHeight));
+
 
         ImgCon.style.height = ImgHeight +"px";
         Piece.style.height = ImgHeight +"px";
@@ -267,9 +290,9 @@ export default class Captcha{
         });
     }
     /**
-     * 绑定事件
+     * 绑定Mobile事件
      */
-    bindEvent(){
+    bindMobileEvent(){
         let self = this;
         let {CaptchaWrapper,Piece,Slider,SliderIcon,SliderProcess,refreshBtn} = this.elements;
         let {SMCaptcha} = this._config;
@@ -292,23 +315,13 @@ export default class Captcha{
             moveEndHandler:moveEndHandler,
             refresh:refresh
         };
-
-        if(!IsPC()){
-            refreshBtn.addEventListener('touchstart',function (e) {
-                refresh()
-            });
-        }else{
-            refreshBtn.onclick = refresh;
-        }
+        refreshBtn.addEventListener('touchstart',function (e) {
+            refresh()
+        });
         document.querySelector('body').addEventListener(method[0], function (e) {
             e.preventDefault();
         });
-
-        if(!IsPC()){
-            SliderIcon.addEventListener(method[0], moveStartHandler);
-        }else{
-            SliderIcon.addEventListener(method[0], moveStartHandler);
-        }
+        SliderIcon.addEventListener(method[0], moveStartHandler);
 
         /**
          * moveEnd
@@ -339,14 +352,8 @@ export default class Captcha{
                 return
             }
             target = e.target;
-
-            if(!IsPC()){
-                currentPageX = e.touches[0].pageX;
-                currentPageY = e.touches[0].pageY;
-            }else{
-                currentPageX = e.pageX;
-                currentPageY = e.pageY;
-            }
+            currentPageX = e.touches[0].pageX;
+            currentPageY = e.touches[0].pageY;
             PieceWidth = Piece.clientWidth;
             maxX = RealWidth - PieceWidth;
             timestamp = new Date().getTime();
@@ -362,13 +369,157 @@ export default class Captcha{
          * @param e
          */
         function moveHandler(e) {
-            if(!IsPC()){
-                DValueX = e.touches[0].pageX - currentPageX;
-                DValueY = e.touches[0].pageY - currentPageY;
-            }else{
-                DValueX = e.pageX - currentPageX;
-                DValueY = e.pageY - currentPageY;
+            DValueX = e.touches[0].pageX - currentPageX;
+            DValueY = e.touches[0].pageY - currentPageY;
+            if (DValueX > 0 && DValueX < maxX) {
+                SliderProcess.style.width = DValueX + Slider.clientWidth + 'px';
+                Slider.style.marginLeft = DValueX + 'px';
+                Piece.style.left = DValueX + 'px';
+            } else if (DValueX <= 0) {
+                Slider.style.marginLeft = '0px';
+            } else {
+                Slider.style.marginLeft = maxX + 'px';
             }
+        }
+
+        function calculateTimer() {
+            return new Date().getTime() - timestamp
+        }
+
+        function addPoint(x, y, timer) {
+            arr.push([x, y, timer])
+        }
+
+        function add(bool) {
+            if (bool) {
+                let timer = calculateTimer();
+                addPoint(DValueX, DValueY, timer);
+            } else {
+                if (arr.length > 100) {
+                    return;
+                } else {
+                    let timer = calculateTimer();
+                    addPoint(DValueX, DValueY, timer);
+                }
+            }
+        }
+
+
+        function refresh() {
+            Slider.style.marginLeft = '0px';
+            Piece.style.left = '0px';
+            SliderProcess.style.width = '0px';
+            arr = [];
+            timestamp = null;
+            currentPageX = 0;
+            currentPageY = 0;
+            DValueX = 0;
+            DValueY = 0;
+            interval = null;
+            startFlag = false;
+            self.resetClassName();
+            SMCaptcha.reset();
+        }
+        /**
+         * 拼装数据
+         */
+        function calculate() {
+            let l = arr.length;
+            let X = arr[l-1][0];
+            let passTime =arr[l-1][3];
+            return {
+                d:X/RealWidth,
+                m:arr,
+                c:passTime
+            }
+        }
+    }
+    /**
+     * 绑定Pc事件
+     */
+    bindPcEvent(){
+        let self = this;
+        let {CaptchaWrapper,Piece,Slider,SliderIcon,SliderProcess,refreshBtn} = this.elements;
+        let {SMCaptcha} = this._config;
+        let RealWidth = CaptchaWrapper.clientWidth;
+        let SliderWidth = Slider.clientWidth;
+        let arr = [];
+        let timestamp = null;
+        let currentPageX = 0;
+        let currentPageY = 0;
+        let DValueX = 0;
+        let DValueY = 0;
+        let interval = null;
+        let startFlag = false;
+        let PieceWidth = 0;
+        let maxX = 0;
+        let target = null;
+        let method = this.method;
+        this.events = {
+            moveStartHandler:moveStartHandler,
+            moveHandler:moveHandler,
+            moveEndHandler:moveEndHandler,
+            refresh:refresh
+        };
+        refreshBtn.addEventListener('click',function (e) {
+            refresh()
+        });
+        document.querySelector('body').addEventListener(method[0], function (e) {
+            e.preventDefault();
+        });
+        document.body.addEventListener(method[0], moveStartHandler);
+
+        /**
+         * moveEnd
+         * @param e
+         */
+        function moveEndHandler(e) {
+            document.body.removeEventListener(method[1], moveHandler);
+            if (startFlag) {
+                add();
+                startFlag = false;
+                let data = calculate();
+                check.bind(SMCaptcha,{
+                    act:data,
+                })()
+            } else {
+                arr = [];
+            }
+            clearInterval(interval);
+        }
+
+
+        /**
+         * moveStart
+         * @param e
+         */
+        function moveStartHandler(e) {
+            if(self.locked){
+                return
+            }
+            currentPageX = e.pageX;
+            currentPageY = e.pageY;
+            if(e.target == SliderIcon||e.target.parentNode==SliderIcon){
+                e.preventDefault();
+                PieceWidth = Piece.clientWidth;
+                maxX = RealWidth - PieceWidth;
+                timestamp = new Date().getTime();
+                startFlag = true;
+                self.moving.bind(self)();
+                document.body.addEventListener(method[1], moveHandler);
+                document.body.addEventListener(method[2], moveEndHandler);
+                interval = setInterval(add, 100)
+            }
+        }
+
+        /**
+         * move
+         * @param e
+         */
+        function moveHandler(e) {
+            DValueX = e.pageX - currentPageX;
+            DValueY = e.pageY - currentPageY;
+            console.log(DValueX,Slider.clientWidth);
             if (DValueX > 0 && DValueX < maxX) {
                 SliderProcess.style.width = (DValueX + Slider.clientWidth).toFixed(3) + 'px';
                 Slider.style.marginLeft = DValueX + 'px';
@@ -432,7 +583,6 @@ export default class Captcha{
             }
         }
     }
-
 
     /**
      * 初始化

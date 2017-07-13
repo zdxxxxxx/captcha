@@ -62,12 +62,14 @@ class Config {
         this.sourcePath = SM_API.conf;// /getResource
         this._extend(conf);
     }
+    
     _extend(obj) {
         new _Object(obj)._each((key, value) => {
             this[key] = value;
         })
     }
 }
+
 
 //初始化验证码
 let initSMCaptcha = function (customConfig, callback) {

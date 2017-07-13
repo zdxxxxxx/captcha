@@ -44,7 +44,7 @@
   .SMCaptcha-captcha-wrapper .SMCaptcha-slider-wrapper .SMCaptcha-slider .SMCaptcha-icon-svg{
       width:60%;
       height:60%;
-      margin: 20%
+      padding: 20%
   }
   .SMCaptcha-captcha-wrapper .SMCaptcha-slider-wrapper .SMCaptcha-slider-text{
       position: absolute;
@@ -131,7 +131,7 @@
       -webkit-animation:none;
       -o-animation:none;
       -moz-animation:none;
-      animation: none;
+      animation:none;
   }
   .SMCaptcha-captcha-wrapper .SMCaptcha-img-wrapper .SMCaptcha-loading-box{
       position: absolute;
