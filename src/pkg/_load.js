@@ -1,54 +1,38 @@
-import {
-    makeURL
-} from './_functions.js';
-/**
- * jsonp
- */
-export default class Load {
-    //构造函数，config配置参数timeout
-    constructor(timeout) {
-        this._config = {
-            timeout:timeout||5000,
-            timer:null
-        };
-    }
-    /**
-     * 获取随机数
-     */
-    random() {
-        return parseInt(Math.random() * 10000) + (new Date()).valueOf();
-    }
+var utils = require('./_functions.js')
+var Load = function (timeout) {
+    this._config = {
+        timeout:timeout||6000,
+        timer:null
+    };
+};
 
-    /**
-     * 加载css
-     * @param url
-     * @param cb
-     */
-    loadCss(url,cb){
-        let error = {
+Load.prototype={
+    random:function () {
+        return parseInt(Math.random() * 10000) + (new Date()).valueOf();
+    },
+    loadCss:function (url,cb) {
+        var error = {
             status:false,
             type:''
         };
-        let self = this;
-        let {timeout} = self._config;
-
+        var self = this;
+        var timeout = this._config.timeout;
         //fix 移动端不执行link 监听事件的bug
-        let timer = setTimeout(function () {
-            let i = document.styleSheets.length;
-            for(let k=0;k<i;k++){
+        var timer = setTimeout(function () {
+            var i = document.styleSheets.length;
+            for(var k=0;k<i;k++){
                 if(document.styleSheets[k].href.indexOf(url)>-1){
                     error.status = false;
                     cb(error)
                 }
             }
         },1000);
-
-        let link = document.createElement("link");
+        var link = document.createElement("link");
         link.rel = "stylesheet";
-        this.timeOutFun(timeout,function (err) {
+        self.timeOutFun(timeout,function (err) {
             if(err){
                 link.onerror = null;
-                link.onload = script.onreadystatechange = null;
+                link.onload = link.onreadystatechange = null;
                 error.status = true;
                 error.type = 'NET_TIMEOUT';
                 cb(error);
@@ -67,7 +51,7 @@ export default class Load {
             if (!this.status &&
                 (!link.readyState ||
                 "loaded" === link.readyState ||
-                "complete" === link.readyState)) {
+                "compvare" === link.readyState)) {
                 window.clearTimeout(self._config.timer);
                 window.clearTimeout(timer);
                 setTimeout(function () {
@@ -80,29 +64,29 @@ export default class Load {
         link.href = url;
 
         (function() {
-            let head = document.getElementsByTagName('head')[0] || document.documentElement;
+            var head = document.getElementsByTagName('head')[0] || document.documentElement;
             if(!head) {
                 setTimeout(arguments.callee, 10);
                 return;
             }
             //自定义协议跳转 无法解释的bug
-            setTimeout(() => {
+            setTimeout(function() {
                 head.insertBefore(link, head.firstChild);
             }, 0);
         })();
-    }
+    },
     //加载script文件
-    loadScript(url, cb, sign) {
-        let error = {
+    loadScript:function(url, cb, sign) {
+        var error = {
             status:false,
             type:''
         };
-        let self = this;
-        let {timeout} = self._config;
-        let script = document.createElement("script");
+        var self = this;
+        var timeout = self._config.timeout;
+        var script = document.createElement("script");
         script.charset = "UTF-8";
         script.async = true;
-        this.timeOutFun(timeout,function (err) {
+        self.timeOutFun(timeout,function (err) {
             if(err&&self._config.status!=='loaded'){
                 script.onerror = null;
                 script.onload = script.onreadystatechange = null;
@@ -127,8 +111,8 @@ export default class Load {
         script.onload = script.onreadystatechange = function () {
             if (!this.status &&
                 (!script.readyState ||
-                    "loaded" === script.readyState ||
-                    "complete" === script.readyState)) {
+                "loaded" === script.readyState ||
+                "compvare" === script.readyState)) {
                 window.clearTimeout(self._config.timer);
                 setTimeout(function () {
                     cb(error);
@@ -137,24 +121,25 @@ export default class Load {
         };
         script.src = url;
         (function() {
-            let head = document.getElementsByTagName('head')[0] || document.documentElement;
+            var head = document.getElementsByTagName('head')[0] || document.documentElement;
             if(!head) {
                 setTimeout(arguments.callee, 10);
                 return;
             }
             //自定义协议跳转 无法解释的bug
-            setTimeout(() => {
+            setTimeout(function() {
                 head.insertBefore(script, head.firstChild);
             }, 0);
         })();
-    };
+    },
     //支持多域名获取js资源
-    load(type,domains,path,protocol,query,cb) {
-        let loadType = 'load' + type ;
-        let tryRequest = (at) => {
-            let url = makeURL(protocol, domains[at], path, query);
-            this[loadType](url, (err) => {
-                let {status} = err;
+    load:function(type,domains,path,protocol,query,cb) {
+        var self = this;
+        var loadType = 'load'+type;
+        function tryRequest(at){
+            var url =utils.makeURL(protocol, domains[at], path, query);
+            self[loadType](url, function(err){
+                var status = err.status;
                 if (status) {
                     if (at >= domains.length - 1) {
                         cb(err);
@@ -167,27 +152,29 @@ export default class Load {
             },query.callback);
         };
         tryRequest(0);
-    };
-    timeOutFun(timeout,cb){
-        this._config.timer&&window.clearTimeout(this._config.timer);
-        this._config.timer = setTimeout(()=>{
+    },
+    timeOutFun:function(timeout,cb){
+        var self =this;
+        self._config.timer&&window.clearTimeout(self._config.timer);
+        self._config.timer = setTimeout(function(){
             cb(true)
         },timeout)
-    };
+    },
     //jsonp
-    jsonp(domains,path,protocol,query,callback) {
-        let cb = "smcb_" + this.random();
+    jsonp:function(domains,path,protocol,query,callback) {
+        var self =this;
+        var cb = "smcb_" + self.random();
         query.callback = cb;
         //服务端返回默认的callback,之后去掉
-        window['smCB'] = window[cb] = (data) => {
-            callback({status:false,type:''},data);
+        window['smCB'] = window[cb] = function(data)  {
+            callback({status:false,type:''},data||{});
             window[cb] = undefined;
             try {
                 delete window[cb];
             } catch (e) {}
         };
-        this.load('Script',domains,path,protocol,query,(err) => {
-            let {status} = err;
+        self.load('Script',domains,path,protocol,query,function(err){
+            var status = err.status;
             if (status) {
                 //服务端返回默认的callback,之后去掉
                 window['smCB'] = window[cb] = function () {
@@ -196,11 +183,7 @@ export default class Load {
                 callback(err,{});
             }
         });
-    };
-    linkp(domains,path,protocol,query,callback){
-        this.load('Css',domains,path,protocol,query,callback)
-    };
-    imagep(domains,path,protocol,query,callback){
-        this.load('Image',domains,path,protocol,query,callback)
-    };
+    }
 };
+module.exports = Load;
+

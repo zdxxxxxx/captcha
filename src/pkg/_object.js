@@ -1,11 +1,15 @@
 /**
- * _Object
+ * object _each
+ * @param obj
+ * @private
  */
-export default class _Object {
-    constructor(_obj) {
-        this._obj = _obj;
-    }
-    _each(process) {
+
+var _Object = function (obj) {
+    this._obj = obj;
+};
+
+_Object.prototype = {
+    _each:function (process) {
         var _obj = this._obj;
         for (var k in _obj) {
             if (_obj.hasOwnProperty(k)) {
@@ -14,4 +18,5 @@ export default class _Object {
         }
         return this;
     }
-}
+};
+module.exports = _Object;

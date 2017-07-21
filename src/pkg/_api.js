@@ -1,20 +1,19 @@
-import Load from './_load.js'
-import {throwError} from './_error.js'
-import {isFunction,isNumber,isObject,isString} from './_functions.js'
-import {DES,base64Decode,base64Encode} from './_des.js'
-import {SM_API} from './_config.js'
-
-
+var Load =require('./_load.js');
+var throwError  = require('./_error.js');
+var utils =  require('./_functions.js');
+var encrypt =require('./_des.js');
+var SM_API= require('./_config.js');
+var stringify = require('./_stringify.js');
 function checkServerParams(data) {
-    let {bg_width,bg_height,bg,fg,domains,rid,k,l} = data;
-    let err = {
+    var bg_width =data.bg_width,bg_height = data.bg_height,bg = data.bg,fg = data.fg,domains=data.domains,rid=data.rid,k=data.k,l=data.l;
+    var err = {
         status:false,
         type:''
     };
-    if(!isNumber(bg_height)||!isNumber(bg_width)||!isString(bg)||!isString(fg)||!isString(rid)||!isString(k)||!isNumber(l)){
+    if(!utils['isNumber'](bg_height)||!utils['isNumber'](bg_width)||!utils['isString'](bg)||!utils['isString'](fg)||!utils['isString'](rid)||!utils['isString'](k)||!utils['isNumber'](l)){
         setError()
     }
-    if(!isObject(domains)||!domains.length||domains.length<1){
+    if(!utils['isObject'](domains)||!domains.length||domains.length<1){
         setError()
     }
     function setError() {
@@ -29,33 +28,32 @@ function checkServerParams(data) {
  * 注册验证码
  * @param conf
  */
-export function register() {
-    let {protocol,organization,appId,customData} = this._config;
-    let {domain,register} = SM_API;
-    let cp = this.cp;
-    let query = {
+function register() {
+    var self = this;
+    var protocol=this._config.protocol,organization=this._config.organization,appId=this._config.appId,customData=this._config.customData;
+    var domain=SM_API.domain,register=SM_API.register;
+    var cp = this.cp;
+    var query = {
         organization:organization,
         appId:appId,
-        data:JSON.stringify(customData)
+        data:stringify(customData)
     };
     cp.loading();
-    let jsp = new Load();
+    var jsp = new Load();
     jsp.jsonp(domain,register,protocol,query,(error,data)=>{
-        let {status,type} =error;
-        if(status){
+        if(error.status){
             cp.loadFail();
-            throwError(type,this._config,{message:'register api error'});
+            throwError(error.type,self._config,{message:'register api error'});
         }else{
-            let {code,detail} = data;
+            var code = data.code,detail = data.detail;
             if(code === 1100){
-                let err = checkServerParams(detail);
-                let {status,type} =err;
-                if(status){
+                var err = checkServerParams(detail);
+                if(err.status){
                     cp.loadFail();
-                    throwError(type,this._config,{message:"register api params err"});
+                    throwError(err.type,self._config,{message:"register api params err"});
                 }else{
-                    let {bg_width,bg_height,bg,fg,domains,rid,k,l} = detail;
-                    this.captchaData = {
+                    var {bg_width,bg_height,bg,fg,domains,rid,k,l} = detail;
+                    self.captchaData = {
                         rid:rid,
                         k:k,
                         l:l
@@ -70,7 +68,7 @@ export function register() {
                 }
             }else{
                 cp.loadFail();
-                throwError('SERVER_ERROR',this._config,{message:"register api fail"});
+                throwError('SERVER_ERROR',self._config,{message:"register api fail"});
             }
         }
     })
@@ -82,46 +80,48 @@ export function register() {
  * 验证
  * @param conf
  */
-export function check(postData) {
-    let {act} = postData;
-    let {protocol,organization,appId} = this._config;
-    let {rid,k,l} = this.captchaData;
-    let {domain,check} = SM_API;
-    let key = DES(this.defaultKey,base64Decode(k),0,0);
-    key = key.substr(0,l);
-    let postAct = DES(key,JSON.stringify(act),1,0);
-    postAct = base64Encode(postAct);
-    let query = {
+function check(postData) {
+    var self = this;
+    var act = postData.act;
+    var protocol=self._config.protocol,organization=self._config.organization,appId=self._config.appId;
+    var rid = self.captchaData.rid,k =self.captchaData.k,l=self.captchaData.l;
+    var domain = SM_API.domain,check = SM_API.check;
+    var key = encrypt['DES'](self.defaultKey,encrypt['base64Decode'](k),0,0).substr(0,l);
+    var postAct = encrypt['base64Encode'](encrypt['DES'](key,stringify(act),1,0));
+    var query = {
         organization:organization,
         appId:appId,
         act:postAct,
-        rid,
+        rid:rid
     };
-    let jsp = new Load();
-    jsp.jsonp(domain,check,protocol,query,(error,data)=>{
-        let {status,type} =error;
-        if(status){
-            this.cp.loadFail();
-            throwError(type,this._config,data,'fv api error');
+    var jsp = new Load();
+    jsp.jsonp(domain,check,protocol,query,function(error,data){
+        if(error.status){
+            self.cp['loadFail']();
+            throwError(error.type,self._config,data,'fv api error');
         }else{
-            let {code,riskLevel} = data;
+            var code = data.code,riskLevel=data.riskLevel;
             if(!code||code!==1100){
-                throwError('SERVER_ERROR',this._config,'fv api failed');
+                throwError('SERVER_ERROR',self._config,'fv api failed');
                 return ;
             }
-            let pass = code===1100&&riskLevel==='PASS';
-            this._result = {
+            var pass = code===1100&&riskLevel==='PASS';
+            self._result = {
                 rid:rid,
                 pass:pass
             };
-            if(isFunction(this._config['onSuccess'])){
-                this._config['onSuccess']();
+            if(utils['isFunction'](self._config['onSuccess'])){
+                self._config['onSuccess'](self._result);
             }
             if(pass){
-                this.cp.success()
+                self.cp['success'](self._result)
             }else{
-                this.cp.fail();
+                self.cp['fail']();
             }
         }
     })
 }
+module.exports = {
+    register:register,
+    check:check
+};

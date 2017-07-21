@@ -40,20 +40,26 @@
 
   .SMCaptcha-captcha-wrapper .SMCaptcha-slider-wrapper .SMCaptcha-slider {
       background-color: #fff;
+      text-align: center;
   }
   .SMCaptcha-captcha-wrapper .SMCaptcha-slider-wrapper .SMCaptcha-slider .SMCaptcha-icon-svg{
       width:60%;
       height:60%;
       padding: 20%
   }
+  .SMCaptcha-captcha-wrapper .SMCaptcha-slider-wrapper .SMCaptcha-slider .SMCaptcha-icon-img{
+      width:60%;
+      height:60%;
+      padding: 20%
+  }
   .SMCaptcha-captcha-wrapper .SMCaptcha-slider-wrapper .SMCaptcha-slider-text{
       position: absolute;
-      width: 8em;
+      width: 10em;
       height: 30px;
       top:50%;
       left: 50%;
       margin-top: -15px;
-      margin-left: -4em;
+      margin-left: -5em;
       font-size: 0.75em;
       text-align: center;
       line-height: 30px;
@@ -82,14 +88,18 @@
   }
   .SMCaptcha-img-wrapper .SMCaptcha-bg-wrapper img{
       width: 100%;
+      height: auto;
   }
   .SMCaptcha-img-wrapper .SMCaptcha-piece-wrapper {
       position: absolute;
       z-index: 2;
+      zoom: 1
   }
   .SMCaptcha-img-wrapper .SMCaptcha-piece-wrapper img{
       height: 100%;
+      width:auto;
   }
+
 
 
   .SMCaptcha-img-wrapper .SMCaptcha-loading-box .SMCaptcha-loading-icon{
@@ -107,12 +117,12 @@
   }
   .SMCaptcha-img-wrapper .SMCaptcha-loading-box .SMCaptcha-loading-text{
       position: absolute;
-      width: 4em;
+      width: 6em;
       height: 30px;
       top:50%;
       left: 50%;
       margin-top: 15px;
-      margin-left: -2em;
+      margin-left: -3em;
       font-size: 0.75em;
       text-align: center;
       line-height: 30px;
@@ -178,7 +188,7 @@
       width: 32px;
       top:1px;
       right: 1px;
-      z-index: 3;
+      z-index: 10;
   }
   @keyframes SMCaptcha-captcha-loading-animate {
       0% {
